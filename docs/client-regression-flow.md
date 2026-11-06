@@ -5,7 +5,7 @@
 ## 运行规则
 
 - 固定使用 `E:\Game\服务器端` 和 `E:\Game\pcl\.minecraft\versions` 中匹配的实例；每次重新发现组合，缺实例标 `N/A`。
-- 每个组合只构建、部署和启动一次；使用同一个客户端进程串联专用服阶段与 LAN 阶段，只有验证重启持久化时再启动一次。
+- 每个组合构建一次；先运行 P-1 无客户端模组登录，再退出客户端、恢复客户端模组并启动，串联专用服阶段与 LAN 阶段。持久化测试允许重启。
 - 同一时刻仅一个客户端接受 UI 输入。LAN 访客需要第二个客户端进程，复用已安装的固定实例，保留房主进程并串行切换焦点；同实例双进程使用各自 cache 启动输出取证，不能混用 latest.log。
 - 所有客户端命令都通过真实聊天栏执行。服务器管理命令可走 RCON；不能用伪造数据包替代功能测试。
 - 证据包括本步骤新增客户端/服务端日志、地图 ZIP、时间戳缓存、配置值。收到命令回显不能直接判 PASS。
@@ -44,6 +44,10 @@ python scripts/testing/client-regression.py client --session <session.json>
 ## 一次专用服会话的执行顺序
 
 服务端前缀：Fabric 为 `/mapsyncerserver`，Forge/NeoForge 为 `/mapsyncer`。以下以 `<server>` 表示。客户端统一 `/mapsyncer`。
+
+0. **P-1 仅服务端安装（issue #32）**：`begin` 增加 `--without-client-mod`，先备份并移除客户端所有 MapSyncer JAR，仅部署服务端。记录客户端 mods 清单、启动模组列表与服务端 JAR SHA256。使用匹配 MC/Loader 的真实客户端加入；确认客户端实际进入世界，并在至少 30 秒后通过 RCON `list` 再确认玩家在线。重复断开重连一次，两次都应正常进入；服务端增量日志不得出现 `server_installed may not be sent`、`Couldn't place player in world` 或 `Invalid player data`，也不能用捕获异常后持续打印 WARN 来冒充通道跳过成功。客户端不应收到 MapSyncer 握手或启动自动同步。随后正常关闭客户端、停服并 `restore`，新建普通双端会话继续 P0，确认首次握手和同步仍有效。NeoForge 必测；Fabric/Forge 同样纳入各自组合，不得以相邻版本替代。此项需要重启客户端，不能运行中移动 JAR。认证失败记 BLOCKED。
+
+   Forge 还必须检查握手阶段无 `mapsyncer:main` 的 `mismatched mod channel list`：仅跳过进服通知不足以解决必需通道导致的登录拒绝。Fabric 检查 `canSend` 跳过未声明接收通道的客户端；双端安装的对照必须收到首个 `server_installed`，防止通道检查时机过早导致正常通知被跳过。
 
 1. **P0 基线**：确认 `/gamemode creative` 成功；执行客户端根命令、`help`、`autosync`。管理端执行 `<server> status`、`radius`、`incremental`、`help`，确认权限与翻译。先将增量设为 `off`，避免准备数据时自动生成干扰。
 2. **P1 生成与层**：先生成三个原版维度和数据包测试维度，再开始下载。覆盖 `generate <dim> <x> <z>`、`generate <dim>`、`--force`、全量生成、运行中重复生成的 busy 提示；status 终止且缓存非空。地表和至少一个洞穴层均需有有效 ZIP。数据包定义保存在 cache，按对应 MC 的数据包格式加载。

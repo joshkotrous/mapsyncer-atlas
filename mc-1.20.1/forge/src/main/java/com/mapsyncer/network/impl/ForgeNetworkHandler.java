@@ -50,8 +50,8 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
         CHANNEL = NetworkRegistry.newSimpleChannel(
                 new ResourceLocation(MapSyncer.MOD_ID, "main"),
                 () -> PROTOCOL_VERSION,
-                PROTOCOL_VERSION::equals,
-                PROTOCOL_VERSION::equals
+                NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION),
+                NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION)
         );
 
         CHANNEL.registerMessage(0, ForgeSyncRequestMessage.class,
@@ -129,7 +129,13 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
 
     @Override
     public void sendToPlayer(ServerPlayer player, ServerInstalledPayload payload) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new ForgeServerInstalledMessage(payload));
+        // Do not send the first notification until channel presence is negotiated.
+        try {
+            if (!CHANNEL.isRemotePresent(player.connection.connection)) return;
+            CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new ForgeServerInstalledMessage(payload));
+        } catch (RuntimeException e) {
+            MapSyncer.LOGGER.warn("Could not send server_installed to {}", player.getUUID(), e);
+        }
     }
 
     @Override

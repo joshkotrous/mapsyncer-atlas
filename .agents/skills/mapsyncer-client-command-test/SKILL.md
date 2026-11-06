@@ -16,6 +16,7 @@ description: >-
 
 - 使用固定服务端 `E:\Game\服务器端` 和客户端 `E:\Game\pcl\.minecraft\versions`；每轮重新发现精确组合。无对应实例记 N/A，不能以相邻版本替代。
 - 用 `cmd /c scripts\fastbuild\build-target.bat <target>` 构建，两端部署同一单文件 JAR，并核对 SHA256。Forge 1.20.1 还需确认 reobf 后的 Commands 方法名。
+- 每个组合先跑流程 P-1：服务端安装、客户端未安装 MapSyncer（`begin --without-client-mod`），两次真实进服并各在线至少 30 秒；再恢复双端安装验证握手与同步，禁止省略可选通道回归。
 - 所有备份、启动输出、临时脚本、截图、测试夹具和 TEMP/TMP/TMPDIR 放仓库 `cache/tmp/`。游戏自身 `logs/latest.log` 保留原位。仓库 AGENTS.md 优先于旧参考文档中的目录示例。
 - 一个组合完成部署后，在同一客户端进程串联全部功能；只有验证重启持久化时才重启。不同组合不能同时占用 25565 或接受 UI 输入。LAN 需要真实房主和访客，允许两个已存在客户端进程，但一次仅操作一个窗口。
 - 客户端命令必须通过真实聊天栏输入。先观察并激活 Minecraft，再按 `/`、输入命令、回车；以本次新增 CHAT 日志确认接受与终态。不能直接调用命令类或伪造网络包。

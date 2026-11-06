@@ -96,9 +96,15 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
 
     @Override
     public void sendToPlayer(ServerPlayer player, ServerInstalledPayload payload) {
-        FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
-        FabricPayloadAdapters.writeServerInstalled(buf, payload);
-        ServerPlayNetworking.send(player, FabricPayloadAdapters.SERVER_INSTALLED_ID, buf);
+        // The installation notice is optional; only send on a negotiated channel.
+        try {
+            if (!ServerPlayNetworking.canSend(player, FabricPayloadAdapters.SERVER_INSTALLED_ID)) return;
+            FriendlyByteBuf buf = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+            FabricPayloadAdapters.writeServerInstalled(buf, payload);
+            ServerPlayNetworking.send(player, FabricPayloadAdapters.SERVER_INSTALLED_ID, buf);
+        } catch (RuntimeException e) {
+            com.mapsyncer.MapSyncer.LOGGER.warn("Could not send server_installed to {}", player.getUUID(), e);
+        }
     }
 
     @Override

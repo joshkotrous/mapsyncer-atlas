@@ -114,7 +114,13 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
 
     @Override
     public void sendToPlayer(ServerPlayer player, ServerInstalledPayload payload) {
-        ServerPlayNetworking.send(player, new FabricPayloadAdapters.ServerInstalledWrapper(payload));
+        // The installation notice is optional; only send on a negotiated channel.
+        try {
+            if (!ServerPlayNetworking.canSend(player, FabricPayloadAdapters.SERVER_INSTALLED_TYPE)) return;
+            ServerPlayNetworking.send(player, new FabricPayloadAdapters.ServerInstalledWrapper(payload));
+        } catch (RuntimeException e) {
+            com.mapsyncer.MapSyncer.LOGGER.warn("Could not send server_installed to {}", player.getUUID(), e);
+        }
     }
 
     @Override

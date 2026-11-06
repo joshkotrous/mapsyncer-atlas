@@ -58,6 +58,12 @@ def read_tail(path, offset=0):
 def java(major):
     return sorted(JDK_ROOT.glob(f'jdk-{major}*/bin/java.exe'))[-1]
 
+def process_running(pid):
+    output = subprocess.run(['tasklist', '/FI', f'PID eq {pid}', '/FO', 'CSV', '/NH'],
+                            capture_output=True, text=True).stdout
+    return re.search(r'"' + str(pid) + r'"', output) is not None
+
+
 def launch(args, cwd, work, name, jdk=None):
     env = dict(os.environ, TEMP=str(work), TMP=str(work), TMPDIR=str(work))
     if jdk:
@@ -79,6 +85,7 @@ def begin(args):
     work = ROOT / 'cache/tmp/client-regression' / stamp
     work.mkdir(parents=True)
     manifest = dict(client=str(client), server=str(server), jar=str(jar), sha256=sha(jar),
+                    client_mod=not args.without_client_mod,
                     backups=[], absent=[], deployed=[], processes={}, steps={})
     for side, directory in [('client', client), ('server', server)]:
         for old in (directory / 'mods').glob('mapsyncer*.jar'):
@@ -87,6 +94,7 @@ def begin(args):
             shutil.copy2(old, dest)
             manifest['backups'].append(dict(original=str(old), backup=str(dest), moved=True))
         paths = ['config/mapsyncer-server.properties', 'config/mapsyncer-server.toml',
+                 'config/mapsyncer-synced.toml',
                  'config/mapsyncer-client.properties', 'config/mapsyncer-client.toml']
         if side == 'server':
             paths += ['server.properties', 'ops.json']
@@ -110,6 +118,8 @@ def begin(args):
         if backup['moved']:
             Path(backup['original']).unlink()
     for directory in [client, server]:
+        if directory == client and args.without_client_mod:
+            continue
         target = directory / 'mods' / jar.name
         shutil.copy2(jar, target)
         manifest['deployed'].append(str(target))
@@ -144,6 +154,9 @@ def start_server(manifest, work):
     print(f'server_pid={pid}')
 
 def start_client(manifest, work, singleplayer, username='CodexTester', role='client', address='localhost:25565', inspect_port=None):
+    previous = manifest['processes'].get(role)
+    if previous is not None and process_running(previous):
+        raise RuntimeError(f'Session process {previous} for {role} is still running; close it before relaunch')
     directory = Path(manifest['client'])
     version = directory.name
     config = json.loads((directory / (version + '.json')).read_text(encoding='utf-8'))
@@ -314,6 +327,8 @@ def main():
     parser.add_argument('--client')
     parser.add_argument('--server')
     parser.add_argument('--jar')
+    parser.add_argument('--without-client-mod', action='store_true',
+                        help='Deploy only to server; back up and remove client MapSyncer jars for optional-channel login regression')
     parser.add_argument('--session')
     parser.add_argument('--name')
     parser.add_argument('--command')

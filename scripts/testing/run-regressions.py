@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / 'cache/tmp/sync-feature-regressions'
 WORK.mkdir(parents=True, exist_ok=True)
 os.environ.update(TEMP=str(WORK), TMP=str(WORK), TMPDIR=str(WORK))
+subprocess.run([sys.executable, '-B', str(ROOT / 'tests/regression/test_client_session.py')],
+               check=True, cwd=ROOT)
 JAVA_HOME = os.environ.get('JAVA_HOME')
 JAVAC = str(Path(JAVA_HOME) / 'bin/javac') if JAVA_HOME else 'javac'
 JAVA = str(Path(JAVA_HOME) / 'bin/java') if JAVA_HOME else 'java'

@@ -109,8 +109,18 @@ public class NeoForgeNetworkHandler implements NetworkHandler<ServerPlayer, Regi
 
     @Override
     public void sendToPlayer(ServerPlayer player, ServerInstalledPayload payload) {
-        PacketDistributor.sendToPlayer(player,
-            new NeoForgePayloadAdapters.NeoForgeServerInstalledPayload(payload));
+        // Optional channels are absent on clients without MapSyncer. The first
+        // notification precedes confirmedPlayers, so check channel negotiation instead.
+        try {
+            if (!player.connection.hasChannel(NeoForgePayloadAdapters.NeoForgeServerInstalledPayload.TYPE)) {
+                return;
+            }
+            PacketDistributor.sendToPlayer(player,
+                new NeoForgePayloadAdapters.NeoForgeServerInstalledPayload(payload));
+        } catch (RuntimeException e) {
+            // An optional installation notification must never abort player login.
+            com.mapsyncer.MapSyncer.LOGGER.warn("Could not send server_installed to {}", player.getUUID(), e);
+        }
     }
 
     /** 玩家断线时清理确认状态 */
