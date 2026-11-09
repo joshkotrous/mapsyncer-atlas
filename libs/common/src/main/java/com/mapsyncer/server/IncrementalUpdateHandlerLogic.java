@@ -14,54 +14,28 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * 增量更新处理器逻辑 - 负责定时扫描并更新已修改的区域地图
- *
- * 支持两种更新模式：
- * - TICK模式：每隔指定tick数执行一次增量扫描
- * - SCHEDULED模式：每天在指定时间执行增量扫描
- *
- * 通过MCA文件时间戳检测哪些区域需要重新生成，
- * 仅更新有变化的区域以提高效率。
- *
- * 注意：此类包含所有平台共享的业务逻辑，平台特定的事件注册由各平台薄包装器处理。
- */
 public class IncrementalUpdateHandlerLogic {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IncrementalUpdateHandlerLogic.class);
 
-    /** 单例实例 */
     private static volatile IncrementalUpdateHandlerLogic instance;
 
-    /** Minecraft服务器实例 */
     private volatile MinecraftServer server;
 
-    /** 处理器是否正在运行 */
     private volatile boolean running = false;
 
-    /** Tick计数器，用于TICK模式计时 */
     private final AtomicInteger tickCounter = new AtomicInteger(0);
 
-    /** 上次计划更新的时间，用于防止同一天多次执行 */
     private volatile LocalDateTime lastScheduledUpdate = null;
 
-    /** 后台执行器，用于异步执行增量扫描，避免阻塞 Server 线程 */
     private volatile ExecutorService updateExecutor = null;
 
-    /** 标记是否已有增量更新任务正在执行 */
     private final AtomicBoolean updateInProgress = new AtomicBoolean(false);
 
     private IncrementalUpdateHandlerLogic() {
-        // 私有构造器，禁止外部实例化
-        // 注意：此构造器必须无外部依赖且不能抛异常，
-        // 否则 DCL volatile 保证在 Java 5+ 下仍需要局部变量防御
+
     }
 
-    /**
-     * 获取单例实例
-     *
-     * @return 增量更新处理器逻辑实例
-     */
     public static IncrementalUpdateHandlerLogic getInstance() {
         if (instance == null) {
             synchronized (IncrementalUpdateHandlerLogic.class) {
@@ -73,11 +47,6 @@ public class IncrementalUpdateHandlerLogic {
         return instance;
     }
 
-    /**
-     * 启动增量更新处理器
-     *
-     * @param server Minecraft服务器实例
-     */
     public void start(MinecraftServer server) {
         if (!CacheCommandHandler.isGenerationAllowed(server)) {
             stop();
@@ -105,9 +74,6 @@ public class IncrementalUpdateHandlerLogic {
         }
     }
 
-    /**
-     * 停止增量更新处理器
-     */
     public void stop() {
         running = false;
         updateInProgress.set(false);
@@ -118,9 +84,6 @@ public class IncrementalUpdateHandlerLogic {
         LOGGER.info("Incremental update handler stopped");
     }
 
-    /**
-     * 获取或创建后台更新执行器（单线程，惰性初始化）
-     */
     private ExecutorService getUpdateExecutor() {
         if (updateExecutor == null) {
             synchronized (this) {
@@ -137,9 +100,6 @@ public class IncrementalUpdateHandlerLogic {
         return updateExecutor;
     }
 
-    /**
-     * 关闭后台更新执行器
-     */
     private void shutdownExecutor() {
         if (updateExecutor != null) {
             updateExecutor.shutdownNow();
@@ -154,31 +114,14 @@ public class IncrementalUpdateHandlerLogic {
         }
     }
 
-    /**
-     * 检查处理器是否正在运行
-     *
-     * @return true表示正在运行，false表示已停止
-     */
     public boolean isRunning() {
         return running;
     }
 
-    /**
-     * 获取当前tick计数
-     *
-     * @return tick计数器值
-     */
     public int getTickCounter() {
         return tickCounter.get();
     }
 
-    /**
-     * 处理服务器Tick事件
-     *
-     * 每个服务器tick都会调用此方法，根据配置的更新模式
-     * 检查是否需要执行增量扫描。
-     * 由平台特定的事件处理器调用。
-     */
     public void onServerTick() {
         if (!running || server == null) return;
         if (!CacheCommandHandler.isGenerationAllowed(server)) {
@@ -202,9 +145,6 @@ public class IncrementalUpdateHandlerLogic {
         }
     }
 
-    /**
-     * 检查TICK模式是否需要执行更新
-     */
     private void checkTickMode() {
         int interval = PlatformManager.getPlatform().getIncrementalUpdateIntervalTicks();
         int currentTick = tickCounter.incrementAndGet();
@@ -215,11 +155,6 @@ public class IncrementalUpdateHandlerLogic {
         }
     }
 
-    /**
-     * 检查SCHEDULED模式是否需要执行更新
-     *
-     * 在目标时间前后1分钟的窗口内检查，确保只在每天执行一次。
-     */
     private void checkScheduledMode() {
         LocalDateTime now = LocalDateTime.now();
         int targetHour = PlatformManager.getPlatform().getScheduledUpdateHour();
@@ -233,11 +168,6 @@ public class IncrementalUpdateHandlerLogic {
         }
     }
 
-    /**
-     * 执行计划更新
-     *
-     * @param reason 更新原因描述
-     */
     private boolean performScheduledUpdate(String reason) {
         if (!CacheCommandHandler.isGenerationAllowed(server)) return false;
         if (ServerSyncHandlerLogic.isSyncActive() || ConversionOrchestrator.isRunning()) {
@@ -283,13 +213,6 @@ public class IncrementalUpdateHandlerLogic {
         return true;
     }
 
-    /**
-     * 获取处理器状态信息
-     *
-     * 返回当前状态和下次更新的预计时间，用于status命令显示。
-     *
-     * @return 状态信息字符串
-     */
     public String getStatusInfo() {
         if (!running) {
             return "Stopped";
@@ -321,11 +244,6 @@ public class IncrementalUpdateHandlerLogic {
         }
     }
 
-    /**
-     * 重置单例实例以释放内存
-     *
-     * 在服务器停止时调用，防止专用服务器重启时的内存泄漏。
-     */
     public static void resetInstance() {
         if (instance != null) {
             instance.stop();

@@ -7,10 +7,12 @@ This is an independent community fork of [MapSyncer for Xaero's World Map](https
 ## Atlas changes
 
 - `/mapsyncer guide`: an in-game setup and troubleshooting checklist explaining chunk generation, tile conversion and map downloads.
-- English-only generated configuration comments for Fabric 26.3, retaining existing configuration keys and values.
+- English messages and generated configuration comments across the retained source targets, retaining existing configuration keys and values. Chinese source comments were removed; the shipped language resources use English.
 - English-first setup documentation and distinct icon and project identity.
 - License text and attribution included in the JAR.
 - Bundled LZ4 updated to the maintained community version 1.14.0.
+- Bounded map-fragment assembly: reject excessive counts, changing metadata, conflicting duplicates and oversized buffers before unsafe allocation.
+- Automated checks for English implementation text and compiled JAR constants/resources.
 - A focused Windows build with a Gradle 9-compatible toolchain resolver.
 
 The initial artifact targets **Minecraft Java 26.3 / Fabric / Java 25**. Other platform folders are retained upstream source and do not represent tested Atlas releases. The initial build is experimental; see its release notes for actual validation.
@@ -58,15 +60,18 @@ Fabric configuration is in `config/mapsyncer-server.properties` and `config/maps
 - Set `maxConcurrentRegions=1` on small servers and `syncSpeedLimitKBps` to cap transfers.
 - `syncRadiusRegions=0` allows all prepared regions. A positive number restricts downloads around the player in their current dimension.
 
-Original detailed English documentation: [README_EN.md](README_EN.md). Original Chinese documentation: [README_ZH_UPSTREAM.md](README_ZH_UPSTREAM.md). Historical upstream testing is not an Atlas compatibility certification.
+Original detailed English documentation: [README_EN.md](README_EN.md). The legacy [upstream README path](README_ZH_UPSTREAM.md) now contains the same English documentation. Historical design notes remain as upstream reference material; they are not compiled or packaged. Historical upstream testing is not an Atlas compatibility certification.
 
 ## Build
 
-Set `JAVA_HOME` to a Java 25 JDK and run from Windows Command Prompt:
+Install Python 3 for the release checks, set `JAVA_HOME` to a Java 25 JDK, and run from Windows Command Prompt:
 
 ```bat
 scripts\fastbuild\build-atlas.bat
+scripts\fastbuild\test-atlas.bat
 ```
+
+Linux/WSL uses the matching `build-atlas.sh` and `test-atlas.sh` entrypoints.
 
 The script restores settings after the build and collects the distribution JAR under `output/`. The Atlas build uses Java 25 throughout, retaining the upstream libraries' Java 17 bytecode target. Gradle downloads required dependencies. After a forcibly interrupted build, restore `settings.atlas-backup.gradle` before retrying. Temporary files stay under `cache/`.
 

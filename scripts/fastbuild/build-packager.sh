@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# MapSyncer MapPackager 构建（Linux / WSL）
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 

@@ -4,18 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * 统一的层生成计划：原 caveStart 字段同时控制地表与多个洞穴层。
- *
- * <p>逗号分隔，可组合：</p>
- * <ul>
- *   <li>{@code SURFACE} — 仅地表（有顶盖维度为逻辑顶以上；无顶盖维度为全列）</li>
- *   <li>{@code ALL} — 生成维度高度范围内的全部洞穴层</li>
- *   <li>{@code 63} / {@code 63,127} — 仅显式洞穴层，不含地表</li>
- *   <li>{@code SURFACE,ALL} / {@code SURFACE,63} / {@code ALL,63} — 组合；与显式 Y 自动去重</li>
- *   <li>空 — 由 {@link RegionGenerationPlanner} 回退为仅地表</li>
- * </ul>
- */
 public record LayerPlan(
     boolean includeSurface,
     boolean includeAllCaves,
@@ -78,9 +66,6 @@ public record LayerPlan(
         return String.join(",", parts);
     }
 
-    /**
-     * 解析层计划字段（逗号分隔的 SURFACE / ALL / Y 坐标）。
-     */
     public static LayerPlan parse(String raw) {
         if (raw == null || raw.isBlank()) {
             return empty();
@@ -118,7 +103,7 @@ public record LayerPlan(
                 try {
                     starts.add(Integer.parseInt(token));
                 } catch (NumberFormatException e) {
-                    // 忽略非法 token
+
                 }
             }
         }
@@ -129,9 +114,6 @@ public record LayerPlan(
         return new LayerPlan(surface, allCaves, Collections.unmodifiableList(starts));
     }
 
-    /**
-     * 兼容旧配置 {@code scanMode|caveField} 合并为层计划。
-     */
     public static LayerPlan fromLegacy(ScanMode scanMode, String caveField) {
         LayerPlan parsed = parse(caveField);
         if (scanMode == ScanMode.SURFACE) {

@@ -2,11 +2,11 @@
 
 MapSyncer Atlas lets players download their server's explored or pregenerated terrain into **Xaero's World Map**. Joining an established world becomes easier: see prepared terrain without walking across every old build and biome again.
 
-Atlas is an independent community fork of **[MapSyncer for Xaero's World Map](https://github.com/RuoChennn/MapSyncer-for-XaeroWorldmap)** by **Ruo_Chen**, who created its conversion and synchronization engine. Maintained by **joshkotrous** under **GPL-3.0**, this fork adds an in-game `/mapsyncer guide`, English configuration output, English-first setup documentation, distinct branding and focused build packaging.
+Atlas is an independent community fork of **[MapSyncer for Xaero's World Map](https://github.com/RuoChennn/MapSyncer-for-XaeroWorldmap)** by **Ruo_Chen**, who created its conversion and synchronization engine. Maintained by **joshkotrous** under **GPL-3.0**, this fork adds an in-game `/mapsyncer guide`, English messages and configuration output, English setup documentation, bounded map-fragment reassembly, distinct branding and focused build packaging.
 
-## Initial release
+## Current Alpha
 
-**Minecraft Java 26.3, Fabric, Java 25.** Experimental initial release; see the file changelog for actual validation. Other loaders and game versions are not included in this release.
+**Minecraft Java 26.3, Fabric, Java 25.** Experimental Alpha; see the file changelog for actual validation. Other loaders and game versions are not included in this release.
 
 ## Install
 

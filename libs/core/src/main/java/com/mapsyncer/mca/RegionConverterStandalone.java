@@ -12,20 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-/**
- * 独立的区域转换器 - 不依赖 Minecraft 库
- *
- * <p>使用自研 MCA 解析器读取 .mca 文件，转换为 Xaero WorldMap 格式。</p>
- *
- * <p>实现已迁移至 {@link com.mapsyncer.mca.convert} 包；本类保留 public API 入口。</p>
- *
- * @see com.mapsyncer.mca.convert.RegionConversionPipeline
- * @see McaReader 用于读取 MCA 文件
- * @see ChunkDataParser 用于解析 Chunk 数据
- * @see ChunkSectionParser 用于解析 Section 数据
- * @see LightMode 光照模式枚举
- * @see DimensionTypeInfo 维度类型信息
- */
 public class RegionConverterStandalone {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegionConverterStandalone.class);
@@ -41,7 +27,6 @@ public class RegionConverterStandalone {
 
     public record ConvertedRegion(int regionX, int regionZ, byte[] xaeroData) {}
 
-    /** 多 pass 转换结果，含 caveLayer（地表层为 Integer.MAX_VALUE） */
     public record LayerConvertedRegion(int regionX, int regionZ, int caveLayer, byte[] xaeroData) {}
 
     public record CaveModeParams(int caveStart, int caveDepth) {

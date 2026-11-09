@@ -2,9 +2,6 @@ package com.mapsyncer.config;
 
 import java.nio.file.Path;
 
-/**
- * 生成缓存与 Xaero 目录路径辅助。
- */
 public final class ConversionOutputPaths {
 
     private ConversionOutputPaths() {}

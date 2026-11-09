@@ -9,12 +9,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import com.mapsyncer.platform.UpdateMode;
 
-/**
- * 配置界面工厂 - 客户端专用
- *
- * 使用 Cloth Config API 创建配置界面。
- * 此类仅在客户端加载。
- */
 public class ConfigScreenFactory {
 
     public static Screen createClientConfigScreen(Screen parentScreen) {
@@ -80,7 +74,6 @@ public class ConfigScreenFactory {
             .setSaveConsumer(config::setEnableDebugLogging)
             .build());
 
-        // 0 = auto（与配置文件一致）；勿用 1–16 默认 4，否则保存会覆盖 auto=0
         general.addEntry(entryBuilder.startIntSlider(
                 Component.translatable("option.mapsyncer.concurrent_regions"),
                 config.getMaxConcurrentRegions(), ConcurrentRegionsConfig.AUTO, ConcurrentRegionsConfig.MAX_CONCURRENT)

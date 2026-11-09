@@ -13,20 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * 按 region 追踪同步流水线耗时：收包 → 写盘 → 反射请求加载 → Xaero 上屏。
- *
- * <p>启用方式（任一即可）：</p>
- * <ul>
- *   <li>JVM 参数 {@code -Dmapsyncer.regionPipelineTrace=true}</li>
- *   <li>客户端配置 {@code enableDebugLogging=true} 且已调用 {@link ModLogConfig#applyDebugLogging()}</li>
- * </ul>
- */
 public final class RegionPipelineTracker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegionPipelineTracker.class);
 
-    /** 等待 Xaero loadState=LOADED 的最长时间 */
     private static final long ON_SCREEN_POLL_TIMEOUT_MS = 5 * 60 * 1000L;
 
     public record RegionKey(int x, int z, int caveLayer) {
@@ -100,7 +90,6 @@ public final class RegionPipelineTracker {
         awaitingOnScreen.clear();
     }
 
-    /** 网络收包与写盘阶段已全部完成，等待剩余 region 上屏后输出汇总 */
     public static void markSyncPipelineComplete() {
         if (!isEnabled()) {
             return;
@@ -147,7 +136,6 @@ public final class RegionPipelineTracker {
         }
     }
 
-    /** 已写盘但跳过反射（维度层不匹配等） */
     public static void onWriteOnlyComplete(int regionX, int regionZ, int caveLayer) {
         if (!isEnabled()) {
             return;
@@ -199,9 +187,6 @@ public final class RegionPipelineTracker {
         awaitingOnScreen.add(key);
     }
 
-    /**
-     * 由 ClientTick 调用，轮询 Xaero loadState 判定上屏完成。
-     */
     public static void onClientTick() {
         if (!isEnabled() || awaitingOnScreen.isEmpty()) {
             return;
@@ -349,7 +334,6 @@ public final class RegionPipelineTracker {
         return XaeroReflectionHelper.getLoadState(mapRegion);
     }
 
-    /** loadState=LOADED 且不在刷新中视为已上屏 */
     private static boolean isDisplayedOnScreen(RegionKey key) {
         if (!XaeroReflectionHelper.isInitialized()) {
             return false;

@@ -2,14 +2,13 @@
 # ==========================================
 # MapPackager - Xaero Map Packager Script
 # Usage: ./package.sh [cache_dir] [server_address]
-#        或在下方配置 SERVER_ADDRESS / OUTPUT_NAME 后直接运行
+# SERVER_ADDRESS: server address, such as play.example.com:25565; empty uses Server.
 # ==========================================
 
-# ========== 自定义配置（修改下面两行即可）==========
 SERVER_ADDRESS=""
 OUTPUT_NAME=""
-# SERVER_ADDRESS  服务器地址，如 play.example.com:25565（留空则使用占位名 Server）
-# OUTPUT_NAME       输出 zip 文件名，如 my_server_map.zip（留空则按日期自动生成）
+# SERVER_ADDRESS: server address, such as play.example.com:25565; empty uses Server.
+# OUTPUT_NAME: output ZIP filename; empty uses a date-based name.
 # ==================================================
 
 set -euo pipefail

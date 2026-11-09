@@ -54,9 +54,6 @@ public final class McaRegionLoader {
         return data;
     }
 
-    /**
-     * 单次 MCA 解析，按多个扫描 pass 输出多份 MapRegionData。
-     */
     public static List<PassMapData> loadMulti(Path mcaPath, int minBuildHeight, int worldTopY,
                                                boolean worldHasSkylight,
                                                BlockPropertyLookup blockLookup,
@@ -119,7 +116,7 @@ public final class McaRegionLoader {
                 try {
                     grid[localX][localZ] = ChunkDataParser.parseChunk(localX, localZ, nbt, worldHeightRange);
                 } catch (RuntimeException e) {
-                    // 单个区块解析失败不应中断整个区域的转换
+
                     failedChunks++;
                     LOGGER.warn("Failed to parse chunk ({}, {}), skipping: {}",
                             localX, localZ, e.toString());

@@ -13,38 +13,19 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * MCA文件时间戳缓存 - 用于检测文件是否更新，触发增量重新生成
- *
- * 缓存每个MCA文件的最后修改时间，用于增量更新检测：
- * - 文件时间戳变化 → 需要重新生成该区域的地图数据
- * - 时间戳不变 → 跳过生成，节省处理时间
- *
- * 使用Properties格式存储缓存文件，人类可读且易于调试。
- */
 public class McaTimestampCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(McaTimestampCache.class);
     private static final String CACHE_FILE_NAME = "mca_timestamps.cache";
 
-    /** 维度 -> 区域坐标 -> 最后修改时间 (毫秒) */
     private final Map<String, Map<String, Long>> timestampCache = new ConcurrentHashMap<>();
 
-    /** 缓存最大区域数（超过时清理不存在文件的时间戳） */
     private static final int MAX_CACHE_REGIONS = 50000;
 
-    /** 缓存文件路径 */
     private final Path cacheFilePath;
 
-    /** 单例实例 */
     private static volatile McaTimestampCache instance;
 
-    /**
-     * 获取单例实例
-     *
-     * @param baseDir 缓存文件存放的基础目录
-     * @return MCA时间戳缓存实例
-     */
     public static McaTimestampCache getInstance(Path baseDir) {
         if (instance == null) {
             synchronized (McaTimestampCache.class) {
@@ -56,23 +37,12 @@ public class McaTimestampCache {
         return instance;
     }
 
-    /**
-     * 私有构造方法
-     *
-     * @param baseDir 缓存文件存放的基础目录
-     */
     private McaTimestampCache(Path baseDir) {
         this.cacheFilePath = baseDir.resolve(CACHE_FILE_NAME);
-        // loadCache 抛异常时 instance 保持 null（volatile 保证构造完成后才赋值），
-        // 下次 getInstance 会重试。不得在此构造器中添加可能抛异常的逻辑而不处理。
+
         loadCache();
     }
 
-    /**
-     * 从文件加载缓存（使用Properties格式，人类可读）
-     *
-     * 缓存格式：dimension/region_x_z = timestamp_seconds
-     */
     private void loadCache() {
         if (!Files.exists(cacheFilePath)) {
             LOGGER.info("No existing timestamp cache found, will create new one");
@@ -85,11 +55,11 @@ public class McaTimestampCache {
 
             for (String key : props.stringPropertyNames()) {
                 try {
-                    // 时间戳以秒为单位存储，读取后转换为毫秒
+
                     String stored = props.getProperty(key);
                     long timestampMillis = stored.startsWith("ms:")
                             ? Long.parseLong(stored.substring(3)) : Long.parseLong(stored) * 1000;
-                    // 解析键：格式为 "dimension/region_x_z"
+
                     String[] parts = key.split("/(?=[^/]+$)", 2);
                     if (parts.length == 2) {
                         String dimension = parts[0];
@@ -111,11 +81,6 @@ public class McaTimestampCache {
         }
     }
 
-    /**
-     * 保存缓存到文件（使用Properties格式，人类可读）
-     *
-     * 先写入临时文件，再原子替换，确保文件完整性。
-     */
     public void saveCache() {
         try {
             Files.createDirectories(cacheFilePath.getParent());
@@ -124,14 +89,13 @@ public class McaTimestampCache {
             for (Map.Entry<String, Map<String, Long>> dimEntry : timestampCache.entrySet()) {
                 String dimension = dimEntry.getKey();
                 for (Map.Entry<String, Long> regionEntry : dimEntry.getValue().entrySet()) {
-                    // 格式：dimension/region_x_z = timestamp (秒)
+
                     String key = dimension + "/" + regionEntry.getKey();
-                    // 存储时转换为秒，更易读
+
                     props.setProperty(key, "ms:" + regionEntry.getValue());
                 }
             }
 
-            // 先写入临时文件，再原子替换
             Path tempFile = cacheFilePath.resolveSibling(CACHE_FILE_NAME + ".temp");
             try (OutputStream os = Files.newOutputStream(tempFile)) {
                 props.store(os, "MCA file modification timestamps (seconds since epoch)\nFormat: dimension/region_x_z = timestamp");
@@ -146,11 +110,6 @@ public class McaTimestampCache {
         }
     }
 
-    /**
-     * 获取 MCA 文件的最后修改时间
-     * @param mcaPath MCA 文件路径
-     * @return 最后修改时间 (毫秒)，如果文件不存在返回 -1
-     */
     public long getFileTimestamp(Path mcaPath) {
         try {
             BasicFileAttributes attrs = Files.readAttributes(mcaPath, BasicFileAttributes.class);
@@ -161,57 +120,41 @@ public class McaTimestampCache {
         }
     }
 
-    /**
-     * 检查区域是否需要重新生成
-     * @param dimension 维度名称
-     * @param regionX 区域 X 坐标
-     * @param regionZ 区域 Z 坐标
-     * @param mcaPath MCA 文件路径
-     * @return true 如果需要重新生成
-     */
     public boolean needsRegeneration(String dimension, int regionX, int regionZ, Path mcaPath) {
         if (!Files.exists(mcaPath)) {
-            return false;  // 文件不存在，不需要生成
+            return false;
         }
 
         String regionKey = regionX + "_" + regionZ;
         long currentTimestamp = getFileTimestamp(mcaPath);
 
         if (currentTimestamp < 0) {
-            return true;  // 无法读取时间，保守地重新生成
+            return true;
         }
 
         Map<String, Long> dimCache = timestampCache.get(dimension);
         if (dimCache == null) {
             LOGGER.debug("No cached timestamp for dimension {}, will regenerate", dimension);
-            return true;  // 维度缓存不存在，需要生成
+            return true;
         }
 
         Long cachedTimestamp = dimCache.get(regionKey);
         if (cachedTimestamp == null) {
             LOGGER.debug("No cached timestamp for region {} in {}, will generate", regionKey, dimension);
-            return true;  // 区域缓存不存在，需要生成
+            return true;
         }
 
-        // 比较时都转换为秒级，避免缓存存储时的精度损失
         long currentSeconds = currentTimestamp / 1000;
         long cachedSeconds = cachedTimestamp / 1000;
         if (currentTimestamp != cachedTimestamp) {
             LOGGER.info("Region {} in {} has been updated (cached={}s, current={}s), will regenerate",
                 regionKey, dimension, cachedSeconds, currentSeconds);
-            return true;  // 文件已更新
+            return true;
         }
 
-        return false;  // 文件未更新
+        return false;
     }
 
-    /**
-     * 更新区域的缓存时间戳
-     * @param dimension 维度名称
-     * @param regionX 区域 X 坐标
-     * @param regionZ 区域 Z 坐标
-     * @param mcaPath MCA 文件路径
-     */
     public void updateTimestamp(String dimension, int regionX, int regionZ, Path mcaPath) {
         long timestamp = getFileTimestamp(mcaPath);
         if (timestamp < 0) {
@@ -223,7 +166,6 @@ public class McaTimestampCache {
         timestampCache.computeIfAbsent(dimension, k -> new ConcurrentHashMap<>())
                       .put(regionKey, timestamp);
 
-        // 检查缓存大小，超过上限时记录警告
         int totalRegions = getTotalCachedRegions();
         if (totalRegions > MAX_CACHE_REGIONS) {
             LOGGER.warn("Timestamp cache size {} exceeds limit {}, consider calling trimStaleEntries()",
@@ -233,22 +175,10 @@ public class McaTimestampCache {
         LOGGER.debug("Updated timestamp cache for {} / {}: {}", dimension, regionKey, timestamp);
     }
 
-    /**
-     * 获取缓存的总区域数
-     */
     private int getTotalCachedRegions() {
         return timestampCache.values().stream().mapToInt(Map::size).sum();
     }
 
-    /**
-     * 清理不存在文件的时间戳条目
-     *
-     * 当缓存超过上限时，可以调用此方法清理那些对应MCA文件已删除的时间戳。
-     * 注意：此方法需要传入region目录路径才能验证文件是否存在。
-     *
-     * @param dimension 维度名称
-     * @param regionDir 区域目录路径
-     */
     public void trimStaleEntries(String dimension, Path regionDir) {
         Map<String, Long> dimCache = timestampCache.get(dimension);
         if (dimCache == null || dimCache.isEmpty()) return;
@@ -267,7 +197,7 @@ public class McaTimestampCache {
                         toRemove.add(regionKey);
                     }
                 } catch (NumberFormatException ignored) {
-                    // 无效的key，也移除
+
                     toRemove.add(regionKey);
                 }
             }
@@ -283,9 +213,6 @@ public class McaTimestampCache {
         }
     }
 
-    /**
-     * 根据已扫描的 MCA 条目比对时间戳，返回需要重新生成的 region（不再遍历目录）。
-     */
     public void updateTimestampValue(String dimension, int x, int z, long timestamp) {
         timestampCache.computeIfAbsent(dimension, key -> new ConcurrentHashMap<>())
                 .put(x + "_" + z, timestamp);
@@ -325,12 +252,6 @@ public class McaTimestampCache {
         return needsRegeneration;
     }
 
-    /**
-     * 批量扫描并更新所有区域的时间戳
-     * @param dimension 维度名称
-     * @param regionDir 区域目录
-     * @return 需要重新生成的区域列表
-     */
     public java.util.List<RegionScanner.RegionCoords> scanAndUpdate(String dimension, Path regionDir) {
         if (!Files.exists(regionDir)) {
             LOGGER.warn("Region directory not found: {}", regionDir);
@@ -339,9 +260,6 @@ public class McaTimestampCache {
         return classifyUpdates(dimension, RegionScanner.listRegionFiles(regionDir));
     }
 
-    /**
-     * 清空缓存
-     */
     public void clearCache() {
         timestampCache.clear();
         try {
@@ -352,22 +270,12 @@ public class McaTimestampCache {
         }
     }
 
-    /**
-     * 获取缓存统计信息
-     *
-     * @return 统计信息字符串
-     */
     public String getCacheStats() {
         int totalDimensions = timestampCache.size();
         int totalRegions = timestampCache.values().stream().mapToInt(Map::size).sum();
         return String.format("Timestamp cache: %d dimensions, %d regions cached", totalDimensions, totalRegions);
     }
 
-    /**
-     * 重置单例实例以释放内存
-     *
-     * 在服务器停止时调用，防止专用服务器重启时的内存泄漏。
-     */
     public static void resetInstance() {
         if (instance != null) {
             instance.timestampCache.clear();

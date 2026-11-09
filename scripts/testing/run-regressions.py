@@ -40,6 +40,9 @@ sources = [
     'libs/common/src/main/java/com/mapsyncer/client/ClientHashManager.java',
     'libs/common/src/main/java/com/mapsyncer/client/ClientTimestampCache.java',
     'libs/platform-api/src/main/java/com/mapsyncer/network/payload/SyncRequestPayload.java',
+    'libs/platform-api/src/main/java/com/mapsyncer/network/payload/ChunkMapData.java',
+    'libs/platform-api/src/main/java/com/mapsyncer/network/payload/MapFragmentAssembler.java',
+    'tests/regression/FragmentAssemblyRegression.java',
     'tests/regression/SyncFeatureRegression.java',
     'tests/regression/SharedXaeroCacheRegression.java',
     'tests/regression/LanSyncRegression.java',
@@ -63,3 +66,6 @@ subprocess.run([JAVA, '-Djava.io.tmpdir=' + str(WORK), '-cp', classpath,
                 'LanSyncRegression', str(fixtures / 'lan-host')], check=True, cwd=ROOT)
 subprocess.run([JAVA, '-Djava.io.tmpdir=' + str(WORK), '-cp', classpath,
                 'HostSilentMapRegression', str(fixtures / 'host-silent')], check=True, cwd=ROOT)
+
+subprocess.run([JAVA, "-Xmx64m", "-Djava.io.tmpdir=" + str(WORK), "-cp", classpath,
+                "FragmentAssemblyRegression"], check=True, cwd=ROOT)

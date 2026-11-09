@@ -26,18 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-/**
- * 地图同步命令业务逻辑。
- * 包含所有平台共享的命令处理逻辑，平台特定的命令注册由各平台薄包装器处理。
- */
 public class MapSyncerCommandLogic {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapSyncerCommandLogic.class);
 
-    /** 同步请求最大重发次数（穿透丢包/服务端无响应时自动重发） */
     public static final int MAX_SYNC_RETRY = 3;
 
-    /** 上次同步请求上下文（供自动重发） */
     private static String retryDimensionId = null;
     private static boolean retrySyncAll = false;
     private static boolean retrySilent = false;
@@ -47,11 +41,6 @@ public class MapSyncerCommandLogic {
     private static Map<String, ClientMeta> retryMetaMap = null;
     private static int retryCount = 0;
 
-    /**
-     * 显示命令帮助信息。
-     *
-     * @param hasServerPermission 是否有服务端权限（OP4+）
-     */
     public static void showHelp(boolean hasServerPermission) {
         XaeroMapIntegrator.rejectHostSync(false);
         Minecraft mc = Minecraft.getInstance();
@@ -69,9 +58,6 @@ public class MapSyncerCommandLogic {
         }
     }
 
-    /**
-     * 提供维度名称建议（namespace:path 格式）。
-     */
     public static void suggestDimensions(SuggestionsBuilder builder) {
         builder.suggest("minecraft:overworld");
         builder.suggest("minecraft:the_nether");
@@ -107,9 +93,6 @@ public class MapSyncerCommandLogic {
         }
     }
 
-    /**
-     * 将 Xaero 目录名转换为维度 ID。
-     */
     public static String xaeroDirToDimensionId(String dirName) {
         if ("null".equals(dirName)) return "overworld";
         if ("DIM-1".equals(dirName)) return "the_nether";
@@ -119,9 +102,6 @@ public class MapSyncerCommandLogic {
         return dirName;
     }
 
-    /**
-     * 同步指定维度。
-     */
     public static int executeSyncDimension(String dimInput) {
         if (XaeroMapIntegrator.rejectHostSync(false)) return 0;
         if ("all".equalsIgnoreCase(dimInput)) {
@@ -137,9 +117,6 @@ public class MapSyncerCommandLogic {
         return 1;
     }
 
-    /**
-     * 同步所有维度。
-     */
     public static int executeSyncAll(boolean silent) {
         if (XaeroMapIntegrator.rejectHostSync(silent)) return 0;
         Minecraft mc = Minecraft.getInstance();
@@ -149,9 +126,6 @@ public class MapSyncerCommandLogic {
         return 1;
     }
 
-    /**
-     * 同步当前维度。
-     */
     public static int executeSyncCurrentDim() {
         if (XaeroMapIntegrator.rejectHostSync(false)) return 0;
         Minecraft mc = Minecraft.getInstance();
@@ -164,9 +138,6 @@ public class MapSyncerCommandLogic {
         return 1;
     }
 
-    /**
-     * 解析用户输入的维度名称为完整维度 ID。
-     */
     public static String resolveDimensionId(String input, ClientLevel level) {
         switch (input.toLowerCase()) {
             case "overworld": return "minecraft:overworld";
@@ -192,12 +163,9 @@ public class MapSyncerCommandLogic {
         return "minecraft:" + input;
     }
 
-    /**
-     * 发送同步请求到服务端。
-     */
     public static void sendSyncRequest(Minecraft mc, String dimensionId, boolean syncAll, boolean silent) {
         if (XaeroMapIntegrator.rejectHostSync(silent)) return;
-        // 新请求，重置自动重发计数
+
         resetSyncRetry();
         if (MapPacketHandler.isSyncInProgress() || ClientHashManager.isComputingMeta()) {
             if (mc.player != null) {
@@ -279,7 +247,6 @@ public class MapSyncerCommandLogic {
             return;
         }
 
-        // 保存请求上下文，供服务端无响应/分包丢失时自动重发
         retryDimensionId = dimensionId;
         retrySyncAll = syncAll;
         retrySilent = silent;
@@ -309,12 +276,6 @@ public class MapSyncerCommandLogic {
         SyncProgressTracker.startTracking();
     }
 
-    /**
-     * 重发上次的同步请求（服务端在线但无响应 / 服务端通知分包未到齐时调用）。
-     *
-     * <p>用保存的 metaMap 直接 dispatch，跳过重复哈希扫描。
-     * 达到 {@link #MAX_SYNC_RETRY} 次后放弃并提示用户。</p>
-     */
     public static void retryLastSyncRequest() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) {
@@ -341,14 +302,10 @@ public class MapSyncerCommandLogic {
                 retryTsCache, retryXaeroDim, retryMetaMap, retrySilent);
     }
 
-    /** 同步成功 / 收到 abort / 断线 / 新请求时重置自动重发计数 */
     public static void resetSyncRetry() {
         retryCount = 0;
     }
 
-    /**
-     * 在维度目录下查找 mw$worldId 目录。
-     */
     public static Path findMwDir(Path dimDir) {
         if (dimDir == null) return null;
         String selected = com.mapsyncer.platform.XaeroReflectionHelper.getSelectedMultiworld(dimDir.getFileName().toString());
@@ -366,7 +323,6 @@ public class MapSyncerCommandLogic {
         }
     }
 
-    /** 显示客户端自动同步开关状态 */
     public static int executeAutoSyncStatus() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return 0;
@@ -378,7 +334,6 @@ public class MapSyncerCommandLogic {
         return 1;
     }
 
-    /** 设置客户端自动同步开关并持久化 */
     public static int setClientAutoSync(boolean enabled) {
         PlatformManager.getPlatform().setClientAutoSyncEnabled(enabled);
         if (!enabled || XaeroMapIntegrator.isIntegratedServerHost()) {

@@ -5,9 +5,6 @@ plugins {
 group = mod_group_id
 version = mod_version
 
-// G2 — MC 1.21.x API 源码（锚点 1.21.1，覆盖 1.21.4–1.21.10）
-// source-only；由 mc-1.21.1/{fabric,forge,neoforge} 胶水模块提供 Minecraft 依赖
-
 tasks.withType(JavaCompile).configureEach {
     enabled = false
 }

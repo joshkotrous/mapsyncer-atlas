@@ -19,25 +19,14 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * 缓存命令处理器 - 平台无关的命令逻辑
- *
- * 各平台模块的命令类调用此类的静态方法执行实际业务逻辑，
- * 仅负责命令注册和参数解析。
- */
 public class CacheCommandHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheCommandHandler.class);
 
-    /**
-     * 当前 Loader 下的服务端命令前缀。
-     * Fabric：{@code mapsyncerserver}；Forge / NeoForge：{@code mapsyncer}。
-     */
     public static String serverCommandPrefix() {
         return PlatformManager.getPlatform().getServerCommandPrefix();
     }
 
-    /** 内置服房主可生成地图及调整配置，但不能同步自己的地图。 */
     public static void showIntegratedServerHint(MinecraftServer server,
             Consumer<net.minecraft.network.chat.Component> sender) {
         if (server != null && !server.isDedicatedServer()) {
@@ -56,18 +45,10 @@ public class CacheCommandHandler {
         return server != null;
     }
 
-    /**
-     * 显示帮助信息（使用当前平台命令前缀）
-     */
     public static void showHelp(Consumer<net.minecraft.network.chat.Component> sender) {
         showHelp(sender, serverCommandPrefix());
     }
 
-    /**
-     * 显示帮助信息
-     *
-     * @param prefix 服务端命令字面量（不含 /）
-     */
     public static void showHelp(Consumer<net.minecraft.network.chat.Component> sender, String prefix) {
         sender.accept(ChatUtils.prefix().append(ChatUtils.header("mapsyncer.help.server.header")));
         sender.accept(ChatUtils.desc("mapsyncer.help.server.generate", prefix));
@@ -83,9 +64,6 @@ public class CacheCommandHandler {
         sender.accept(ChatUtils.desc("mapsyncer.help.server.reloadconfig", prefix));
     }
 
-    /**
-     * 向发送者报告当前增量更新工作模式（配置值 + 运行信息）。
-     */
     public static void showIncrementalMode(Consumer<net.minecraft.network.chat.Component> sender) {
         sender.accept(incrementalStatusMessage());
         sender.accept(ChatUtils.desc(
@@ -107,9 +85,6 @@ public class CacheCommandHandler {
                 : ChatUtils.message("mapsyncer.command.incremental_status_disabled");
     }
 
-    /**
-     * 生成状态（带前缀），与 {@link #incrementalStatusMessage()} 共用 lang 组件。
-     */
     public static MutableComponent generationStatusMessage() {
         if (ConversionOrchestrator.isRunning()) {
             return ChatUtils.message("mapsyncer.generate.in_progress",
@@ -120,9 +95,6 @@ public class CacheCommandHandler {
         return ChatUtils.message("mapsyncer.generate.no_progress");
     }
 
-    /**
-     * 增量更新状态（带前缀）。按配置模式报告，不因 handler 未跑而误报“未启用”。
-     */
     public static MutableComponent incrementalStatusMessage() {
         var platform = PlatformManager.getPlatform();
         UpdateMode mode = platform.getIncrementalUpdateMode();
@@ -149,10 +121,6 @@ public class CacheCommandHandler {
         return ChatUtils.message("mapsyncer.command.incremental_status_disabled");
     }
 
-    /**
-     * 生成所有维度的地图缓存
-     * @return true 任务已提交，false 已有转换任务在运行
-     */
     public static boolean generateAll(MinecraftServer server, Runnable onSuccess) {
         if (!isGenerationAllowed(server)) return false;
         if (ConversionOrchestrator.isRunning()) {
@@ -170,10 +138,6 @@ public class CacheCommandHandler {
         return true;
     }
 
-    /**
-     * 生成指定维度的地图缓存
-     * @return true 任务已提交，false 已有转换任务在运行
-     */
     public static boolean generateDimension(MinecraftServer server, String dimensionId, Runnable onSuccess) {
         if (!isGenerationAllowed(server)) return false;
         if (ConversionOrchestrator.isRunning()) {
@@ -190,10 +154,6 @@ public class CacheCommandHandler {
         return true;
     }
 
-    /**
-     * 强制重新生成指定维度的地图缓存
-     * @return true 任务已提交，false 已有转换任务在运行
-     */
     public static boolean generateDimensionForce(MinecraftServer server, String dimensionId, Runnable onSuccess) {
         if (!isGenerationAllowed(server)) return false;
         if (ConversionOrchestrator.isRunning()) {
@@ -210,16 +170,10 @@ public class CacheCommandHandler {
         return true;
     }
 
-    /**
-     * 检查区域是否存在
-     */
     public static boolean checkRegionExists(MinecraftServer server, ResourceKey<Level> dimension, int x, int z) {
         return ConversionOrchestrator.checkMcaFileExists(server, dimension, x, z) != null;
     }
 
-    /**
-     * 生成单个区域的地图缓存
-     */
     public static boolean generateSingleRegion(MinecraftServer server, ResourceKey<Level> dimension, int x, int z,
                                             Consumer<SingleRegionResult> resultHandler) {
         if (!isGenerationAllowed(server)) return false;
@@ -240,46 +194,26 @@ public class CacheCommandHandler {
         return true;
     }
 
-    /**
-     * 获取缓存统计信息
-     */
     public static List<DimensionCacheStats> getCacheStats() {
         return ConversionOrchestrator.getCacheStats();
     }
 
-    /**
-     * 获取已完成的维度列表
-     */
     public static List<String> getCompletedDimensions() {
         return ConversionOrchestrator.getCompletedDimensions();
     }
 
-    /**
-     * 获取处理计数
-     */
     public static int getProcessedCount() {
         return ConversionOrchestrator.getProcessedCount();
     }
 
-    /**
-     * 获取总计数
-     */
     public static int getTotalCount() {
         return ConversionOrchestrator.getTotalCount();
     }
 
-    /**
-     * 获取更新计数
-     */
     public static int getUpdatedCount() {
         return ConversionOrchestrator.getUpdatedCount();
     }
 
-    // ===== 配置操作 =====
-
-    /**
-     * 禁用增量更新
-     */
     public static void disableIncremental() {
         var platform = PlatformManager.getPlatform();
         platform.setIncrementalUpdateMode(UpdateMode.DISABLED);
@@ -287,9 +221,6 @@ public class CacheCommandHandler {
         IncrementalUpdateHandlerLogic.getInstance().stop();
     }
 
-    /**
-     * 设置TICK模式增量更新
-     */
     public static void setIncrementalTick(MinecraftServer server) {
         if (!isGenerationAllowed(server)) {
             IncrementalUpdateHandlerLogic.getInstance().stop();
@@ -301,9 +232,6 @@ public class CacheCommandHandler {
         IncrementalUpdateHandlerLogic.getInstance().start(server);
     }
 
-    /**
-     * 设置TICK模式增量更新并指定间隔
-     */
     public static void setIncrementalTick(MinecraftServer server, int interval) {
         if (!isGenerationAllowed(server)) {
             IncrementalUpdateHandlerLogic.getInstance().stop();
@@ -316,9 +244,6 @@ public class CacheCommandHandler {
         IncrementalUpdateHandlerLogic.getInstance().start(server);
     }
 
-    /**
-     * 设置SCHEDULED模式增量更新
-     */
     public static void setIncrementalScheduled(MinecraftServer server) {
         if (!isGenerationAllowed(server)) {
             IncrementalUpdateHandlerLogic.getInstance().stop();
@@ -330,9 +255,6 @@ public class CacheCommandHandler {
         IncrementalUpdateHandlerLogic.getInstance().start(server);
     }
 
-    /**
-     * 设置SCHEDULED模式并指定小时
-     */
     public static void setScheduledTime(MinecraftServer server, int hour) {
         if (!isGenerationAllowed(server)) {
             IncrementalUpdateHandlerLogic.getInstance().stop();
@@ -345,9 +267,6 @@ public class CacheCommandHandler {
         IncrementalUpdateHandlerLogic.getInstance().start(server);
     }
 
-    /**
-     * 设置SCHEDULED模式并指定完整时间
-     */
     public static void setScheduledTime(MinecraftServer server, int hour, int minute) {
         if (!isGenerationAllowed(server)) {
             IncrementalUpdateHandlerLogic.getInstance().stop();
@@ -361,37 +280,22 @@ public class CacheCommandHandler {
         IncrementalUpdateHandlerLogic.getInstance().start(server);
     }
 
-    /**
-     * 获取当前配置的增量更新模式
-     */
     public static UpdateMode getIncrementalUpdateMode() {
         return PlatformManager.getPlatform().getIncrementalUpdateMode();
     }
 
-    /**
-     * 获取当前配置的增量更新间隔
-     */
     public static int getIncrementalUpdateIntervalTicks() {
         return PlatformManager.getPlatform().getIncrementalUpdateIntervalTicks();
     }
 
-    /**
-     * 获取当前配置的定时更新小时
-     */
     public static int getScheduledUpdateHour() {
         return PlatformManager.getPlatform().getScheduledUpdateHour();
     }
 
-    /**
-     * 获取当前配置的定时更新分钟
-     */
     public static int getScheduledUpdateMinute() {
         return PlatformManager.getPlatform().getScheduledUpdateMinute();
     }
 
-    /**
-     * 从磁盘重新加载服务端配置，并重置维度注册与增量更新调度。
-     */
     public static boolean reloadConfig(MinecraftServer server) {
         try {
             PlatformManager.getPlatform().reloadConfig();
@@ -399,7 +303,6 @@ public class CacheCommandHandler {
             DimensionRegistry.resetRegistration();
             DimensionConfigParser.invalidateCache();
 
-            // 空闲时重建线程池，使 maxConcurrentRegions 在本会话立即生效
             if (!ConversionOrchestrator.isRunning()) {
                 ConversionOrchestrator.shutdownExecutor();
             }
@@ -419,16 +322,10 @@ public class CacheCommandHandler {
         }
     }
 
-    /**
-     * 获取友好的维度名称
-     */
     public static String getFriendlyDimensionName(ResourceKey<Level> dimension) {
         return DimensionPathMapping.getInstance().getFriendlyName(DimensionApiHelper.getDimId(dimension));
     }
 
-    /**
-     * 获取维度ID字符串
-     */
     public static String getDimensionId(ResourceKey<Level> dimension) {
         return DimensionApiHelper.getDimId(dimension);
     }

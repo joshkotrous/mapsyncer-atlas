@@ -15,13 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.BiConsumer;
 
-/**
- * Fabric 1.20.1 网络处理器实现（仅服务端安全）
- *
- * <p>此类不引用任何客户端类（ClientPlayNetworking 等），
- * 确保在专用服务器上类加载不会失败。</p>
- * <p>客户端接收器通过 {@link FabricClientNetworkHandler} 单独注册。</p>
- */
 public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FabricNetworkHandler.class);
@@ -31,9 +24,6 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
     private BiConsumer<ServerInstalledPayload, PayloadContext> serverInstalledHandler;
     private BiConsumer<SyncRequestPayload, PayloadContext> syncRequestHandler;
 
-    /**
-     * 服务端 handler 上下文持有者
-     */
     private record ServerPlayerContext(net.minecraft.server.MinecraftServer server, ServerPlayer player) {}
 
     @Override
@@ -51,12 +41,6 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
         );
     }
 
-    /**
-     * 注册客户端接收器。
-     *
-     * <p>此方法委托给 {@link FabricClientNetworkHandler}，避免在此类中引用客户端类。
-     * 必须在客户端环境中调用。</p>
-     */
     public void registerClientHandlers() {
         FabricClientNetworkHandler.init(this);
     }

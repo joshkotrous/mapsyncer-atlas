@@ -17,25 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Fabric 1.20.1 Payload 适配器
- *
- * 提供 Fabric Networking API (Identifier-based) 需要的 ResourceLocation 通道常量
- * 和 FriendlyByteBuf 序列化方法。
- *
- * <p>MC 1.20.1 不支持 PayloadTypeRegistry/CustomPacketPayload/StreamCodec，
- * 使用旧版 Identifier + FriendlyByteBuf 通道模式。</p>
- */
 public class FabricPayloadAdapters {
-
-    // ===== 通道 ID 常量 =====
 
     public static final ResourceLocation SYNC_REQUEST_ID = new ResourceLocation(MapSyncer.MOD_ID, "sync_request");
     public static final ResourceLocation SYNC_RESPONSE_ID = new ResourceLocation(MapSyncer.MOD_ID, "sync_response");
     public static final ResourceLocation SYNC_PROGRESS_ID = new ResourceLocation(MapSyncer.MOD_ID, "sync_progress");
     public static final ResourceLocation SERVER_INSTALLED_ID = new ResourceLocation(MapSyncer.MOD_ID, "server_installed");
-
-    // ===== 同步请求 =====
 
     public static void writeSyncRequest(FriendlyByteBuf buf, SyncRequestPayload payload) {
         SyncRequestWireCodec.write(buf, payload);
@@ -44,8 +31,6 @@ public class FabricPayloadAdapters {
     public static SyncRequestPayload readSyncRequest(FriendlyByteBuf buf) {
         return SyncRequestWireCodec.read(buf);
     }
-
-    // ===== 同步响应 =====
 
     public static void writeSyncResponse(FriendlyByteBuf buf, SyncResponsePayload payload) {
         buf.writeInt(payload.worldId());
@@ -69,8 +54,6 @@ public class FabricPayloadAdapters {
         return new SyncResponsePayload(chunks, isComplete, worldId, status);
     }
 
-    // ===== 同步进度 =====
-
     public static void writeSyncProgress(FriendlyByteBuf buf, SyncProgressPayload payload) {
         buf.writeInt(payload.processed());
         buf.writeInt(payload.total());
@@ -81,8 +64,6 @@ public class FabricPayloadAdapters {
         return new SyncProgressPayload(buf.readInt(), buf.readInt(), buf.readUtf());
     }
 
-    // ===== 服务端已安装 =====
-
     public static void writeServerInstalled(FriendlyByteBuf buf, ServerInstalledPayload payload) {
         ServerInstalledWireCodec.write(buf, payload);
     }
@@ -90,8 +71,6 @@ public class FabricPayloadAdapters {
     public static ServerInstalledPayload readServerInstalled(FriendlyByteBuf buf) {
         return ServerInstalledWireCodec.read(buf);
     }
-
-    // ===== ChunkMapData 序列化 =====
 
     private static void writeChunkMapData(FriendlyByteBuf buf, ChunkMapData data) {
         buf.writeInt(data.regionX);

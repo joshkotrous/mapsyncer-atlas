@@ -5,9 +5,6 @@ plugins {
 version = mod_version
 group = mod_group_id
 
-// 根项目：聚合构建，不产生输出 JAR
-// 所有构建由子项目完成
-
 subprojects {
     repositories {
         mavenCentral()
@@ -22,7 +19,6 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-// 构建默认 settings.gradle 中已 include 的胶水模块（不含 Forge / 隔离 Fabric）
 afterEvaluate {
     task buildAll {
         dependsOn ':libs:core:build'
@@ -38,25 +34,23 @@ afterEvaluate {
     }
 }
 
-// 将所有子项目的构建产物统一收集到根目录 output
 tasks.register('collectJars', Copy) {
-    description = '将所有子项目 JAR 收集到 output 目录'
+    description = 'Collect all subproject JARs into the output directory'
     group = 'distribution'
     into layout.projectDirectory.dir('output')
-    // 从每个子项目的 build/libs 目录收集 JAR（不依赖构建任务）
+
     subprojects { sub ->
         from(sub.layout.buildDirectory.dir('libs')) {
             include '*.jar'
             exclude '*-slim.jar', '*-sources.jar', '*-javadoc.jar'
         }
     }
-    // 排除 libs 模块的 JAR（不需要分发）
+
     outputs.upToDateWhen { false }
 }
 
-// 构建 MapPackager 独立打包工具并收集到 output 目录
 tasks.register('buildPackager') {
-    description = '构建 MapPackager 打包工具并输出到 output 目录'
+    description = 'Build the MapPackager tool and copy it to the output directory'
     group = 'distribution'
     dependsOn ':libs:core:mapPackagerDist'
     doLast {
@@ -66,6 +60,6 @@ tasks.register('buildPackager') {
             }
             into layout.projectDirectory.dir('output')
         }
-        logger.lifecycle('MapPackager 产物已输出到 output/ 目录')
+        logger.lifecycle('MapPackager artifacts were copied to output/')
     }
 }

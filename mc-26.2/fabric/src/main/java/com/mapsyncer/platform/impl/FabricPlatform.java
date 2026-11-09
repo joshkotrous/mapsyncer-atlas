@@ -27,19 +27,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * Fabric 26.x 平台实现
- *
- * 实现 Platform 接口，适配 Fabric 26.2 的 API。
- * 支持 Minecraft 26.2（协议 776）。
- */
 public class FabricPlatform implements Platform {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FabricPlatform.class);
 
     private MinecraftServer server;
 
-    // 缓存方块属性查询结果
     private static final Map<String, BlockProperties> blockPropertiesCache = new HashMap<>();
 
     public void setServer(MinecraftServer server) {
@@ -55,7 +48,6 @@ public class FabricPlatform implements Platform {
     public String getServerCommandPrefix() {
         return "mapsyncerserver";
     }
-
 
     @Override
     public String getMinecraftVersion() {
@@ -77,11 +69,9 @@ public class FabricPlatform implements Platform {
         return net.fabricmc.loader.api.FabricLoader.getInstance().getEnvironmentType() == net.fabricmc.api.EnvType.CLIENT;
     }
 
-    // ===== 方块属性 =====
-
     @Override
     public BlockProperties getBlockProperties(String blockName) {
-        // 检查缓存
+
         BlockProperties cached = blockPropertiesCache.get(blockName);
         if (cached != null) {
             return cached;
@@ -104,7 +94,6 @@ public class FabricPlatform implements Platform {
             Block block = blockOpt.get();
             BlockState state = block.defaultBlockState();
 
-            // 使用 BlockPropertyResolver 获取属性
             BlockPropertyResolver.BlockProperties props = BlockPropertyResolver.getProperties(blockName);
 
             BlockProperties result = new BlockProperties(
@@ -138,8 +127,6 @@ public class FabricPlatform implements Platform {
         return BlockColorMapper.getBlockColorByName(blockName);
     }
 
-    // ===== 世界信息 =====
-
     @Override
     public int getDefaultMinBuildHeight() {
         return -64;
@@ -150,8 +137,6 @@ public class FabricPlatform implements Platform {
         return 320;
     }
 
-    // ===== 维度信息 =====
-
     @Override
     public String getXaeroDimensionPath(String dimensionId) {
         return DimensionPathMapping.getInstance().toXaeroDimension(dimensionId);
@@ -161,8 +146,6 @@ public class FabricPlatform implements Platform {
     public DimensionTypeInfo getDimensionTypeInfo(String dimensionId) {
         return DimensionTypeInfo.fromDimensionId(dimensionId);
     }
-
-    // ===== 配置系统 =====
 
     @Override
     public int getSyncRadiusRegions() { return ModConfig.SERVER().getSyncRadiusRegions(); }
@@ -286,8 +269,6 @@ public class FabricPlatform implements Platform {
         return ModConfig.SERVER().getConfigForDimension(dimensionPath);
     }
 
-    // ===== 文件路径 =====
-
     @Override
     public Path getServerMapCacheDir() {
         if (server != null) {
@@ -300,7 +281,7 @@ public class FabricPlatform implements Platform {
     @Override
     public Path getClientXaeroWorldMapDir() {
         try {
-            // 使用 XaeroMapIntegrator 获取当前服务器目录（这是客户端方法，需要在客户端环境中调用）
+
             if (isClientEnvironment()) {
                 Path serverDir = com.mapsyncer.client.XaeroMapIntegrator.getCurrentServerDirectory();
                 if (serverDir != null) {
@@ -308,7 +289,6 @@ public class FabricPlatform implements Platform {
                 }
             }
 
-            // 回退：返回默认 Xaero 目录（基于当前工作目录）
             Path gameDir = Path.of(System.getProperty("user.dir"));
             return com.mapsyncer.util.XaeroPathResolver.getWorldMapDir(gameDir);
         } catch (Exception e) {
@@ -320,7 +300,7 @@ public class FabricPlatform implements Platform {
     @Override
     public String getCurrentServerDirectoryName() {
         try {
-            // 使用 XaeroMapIntegrator 获取当前服务器目录（这是客户端方法，需要在客户端环境中调用）
+
             if (isClientEnvironment()) {
                 Path serverDir = com.mapsyncer.client.XaeroMapIntegrator.getCurrentServerDirectory();
                 if (serverDir != null) {
@@ -338,14 +318,10 @@ public class FabricPlatform implements Platform {
         return ModConfig.SERVER().getServerName();
     }
 
-    // ===== 日志 =====
-
     @Override
     public Logger getLogger() {
         return LOGGER;
     }
-
-    // ===== 工具方法 =====
 
     @Override
     public boolean matchesBlockPattern(String blockName, String pattern) {
@@ -378,7 +354,7 @@ public class FabricPlatform implements Platform {
     @Override
     public void recordUpdatedRegions(Set<RegionCoord> regions) {
         try {
-            // 转换 Platform.RegionCoord 到 XaeroMapDataHandler.RegionCoord
+
             Set<com.mapsyncer.client.XaeroMapDataHandler.RegionCoord> xaeroRegions = new HashSet<>();
             for (RegionCoord coord : regions) {
                 xaeroRegions.add(new com.mapsyncer.client.XaeroMapDataHandler.RegionCoord(
@@ -392,17 +368,11 @@ public class FabricPlatform implements Platform {
         }
     }
 
-    /**
-     * 清除方块属性缓存
-     */
     @Override
     public void clearBlockPropertiesCache() {
         blockPropertiesCache.clear();
     }
 
-    /**
-     * 获取缓存大小
-     */
     public static int getCacheSize() {
         return blockPropertiesCache.size();
     }

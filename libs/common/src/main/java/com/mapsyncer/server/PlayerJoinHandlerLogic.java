@@ -14,10 +14,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * 玩家登录事件处理逻辑。
- * 包含所有平台共享的业务逻辑，平台特定的事件注册由各平台薄包装器处理。
- */
 public class PlayerJoinHandlerLogic {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlayerJoinHandlerLogic.class);
@@ -26,9 +22,6 @@ public class PlayerJoinHandlerLogic {
 
     private static int cleanupTickCounter = 0;
 
-    /**
-     * 发送服务端已安装通知给客户端，并启动增量更新处理器。
-     */
     public static void onPlayerJoin(ServerPlayer player, MinecraftServer server) {
         if (server == null) return;
 
@@ -39,7 +32,6 @@ public class PlayerJoinHandlerLogic {
             return;
         }
 
-        // 发送 ServerInstalled 通知（跨加载器兼容：无论客户端使用什么加载器都能接收）
         long lastGenTime = GenerationCache.getInstance(ConversionOrchestrator.getCacheDir()).getLastGenerationTime();
         UpdateMode mode = PlatformManager.getPlatform().getIncrementalUpdateMode();
         int intervalTicks = PlatformManager.getPlatform().getIncrementalUpdateIntervalTicks();
@@ -47,7 +39,7 @@ public class PlayerJoinHandlerLogic {
         String serverName = PlatformManager.getServerName();
         ServerMapCache.Snapshot mapCache = ServerMapCache.snapshot();
         if (mapCache.sharedXaero()) {
-            // Xaero 原生转换不维护 generation_cache；在后台读取真实文件时间，不阻塞 Server 线程。
+
             java.util.concurrent.CompletableFuture.supplyAsync(mapCache::lastModifiedSeconds)
                     .thenAccept(timestamp -> server.execute(() -> {
                         if (server.getPlayerList().getPlayer(player.getUUID()) == player
@@ -66,23 +58,14 @@ public class PlayerJoinHandlerLogic {
         }
     }
 
-    /**
-     * 中断正在进行的该玩家的地图同步任务。
-     */
     public static void onPlayerLeave(UUID playerId) {
         ServerSyncHandlerLogic.onPlayerDisconnect(playerId);
     }
 
-    /**
-     * 清理所有单例缓存实例，防止专用服务器重启时的内存泄漏。
-     */
     public static void onServerStopped() {
         ServerLifecycleBridge.onServerStopped();
     }
 
-    /**
-     * 定期清理异常断线玩家的残留状态，防止内存泄漏。
-     */
     public static void onServerTick(MinecraftServer server) {
         cleanupTickCounter++;
 

@@ -13,7 +13,6 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** LAN 回归：无数据响应排队时的 worker 清理，以及真实转换 ZIP 的重复同步。 */
 public final class LanSyncRegression {
     private static int checks;
     private static void check(boolean value, String message) {
@@ -44,12 +43,12 @@ public final class LanSyncRegression {
         check(!ServerSyncSession.isCurrent(player, 1), "terminal callback releases session");
 
         Path root = Path.of(args[0]);
-        // 原生 Convert All Regions 不切换 currentMultiworld：房主仍处于空串表示的存档视图。
+
         var host = new ServerMapCache.Snapshot(root, true, Map.of("null", ""));
         Path convertedDirectory = root.resolve("null/cm$converted");
         Files.createDirectories(convertedDirectory);
         check(host.regionFiles().isEmpty(), "empty selected map has no regions");
-        // 使用现有文件往返回归产生的真实 ZIP，不把 Xaero 缓存或探索文件算作同步数据。
+
         Path source = root.getParent().resolve("shared-xaero/xaero/world-map/world-A/DIM-1/mw$chosen/0_0.zip");
         for (int x = -2; x <= 1; x++) {
             for (int z = -1; z <= 1; z++) {

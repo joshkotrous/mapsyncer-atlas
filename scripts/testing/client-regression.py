@@ -18,7 +18,7 @@ import uuid
 
 ROOT = Path(__file__).resolve().parents[2]
 CLIENT_ROOT = Path('E:/Game/pcl/.minecraft/versions')
-SERVER_ROOT = Path('E:/Game/服务器端')
+SERVER_ROOT = Path('E:/Game/\u670d\u52a1\u5668\u7aef')
 JDK_ROOT = Path('C:/Program Files/Eclipse Adoptium')
 
 def sha(path):

@@ -10,11 +10,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 写入 Xaero MapSaveLoad / NbtUtils.writeBlockState 风格的方块状态 NBT。
- *
- * <p>格式：根 Compound → Name (string) + Properties (compound，属性按字母序)</p>
- */
 public final class XaeroBlockStateNbtWriter {
 
     public static final BlockState AIR = new BlockState("minecraft:air", Map.of());
@@ -24,9 +19,6 @@ public final class XaeroBlockStateNbtWriter {
 
     private XaeroBlockStateNbtWriter() {}
 
-    /**
-     * Region 内 block palette 键：名称 + 按字母序排列的属性，对齐 Xaero HashMap&lt;BlockState&gt; 语义。
-     */
     public record PaletteKey(String name, List<Map.Entry<String, String>> properties) {
 
         public static PaletteKey from(BlockState state) {

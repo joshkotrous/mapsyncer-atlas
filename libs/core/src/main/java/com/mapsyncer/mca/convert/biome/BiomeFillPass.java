@@ -7,12 +7,6 @@ import com.mapsyncer.mca.convert.model.MapRegionData;
 import static com.mapsyncer.mca.convert.model.ConvertConstants.CHUNKS_PER_REGION;
 import static com.mapsyncer.mca.convert.model.ConvertConstants.REGION_SIZE_BLOCKS;
 
-/**
- * 扫描完成后填充 biome，对齐 Xaero fillBiomes（按 topHeight/height 采样）。
- *
- * <p>地表层：有扫描结果时用 heightMap；否则用高度图地表 Y。</p>
- * <p>洞穴层：有扫描结果时用洞穴壁 Y；否则用 caveStart，且不回退到地表群系。</p>
- */
 public final class BiomeFillPass {
 
     private BiomeFillPass() {}

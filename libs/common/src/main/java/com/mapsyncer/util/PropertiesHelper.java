@@ -2,7 +2,6 @@ package com.mapsyncer.util;
 
 import java.util.Properties;
 
-/** Properties 读写辅助：Fabric camelCase 与 Forge snake_case 键名兼容。 */
 public final class PropertiesHelper {
 
     private PropertiesHelper() {}

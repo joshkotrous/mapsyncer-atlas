@@ -1,11 +1,6 @@
 @echo off
 chcp 65001 >nul
-rem MapSyncer 开发环境依赖一键部署（纯 cmd）
 rem
-rem 用法:
-rem   scripts\setup-deps.bat              完整部署
-rem   scripts\setup-deps.bat -Quick       仅 JDK + Gradle，不预拉 Maven
-rem   scripts\setup-deps.bat -SkipJdk     跳过 JDK 安装（仅检测）
 rem   scripts\setup-deps.bat -SkipGradle89
 rem   scripts\setup-deps.bat -SkipMaven
 rem   scripts\setup-deps.bat -SkipPropsUpdate
@@ -108,7 +103,6 @@ if "%NOPAUSE%"=="0" pause
 exit /b 1
 
 rem ------------------------------------------------------------
-rem JDK 检测：扫描常见 Temurin 安装目录，记录 17/21/25 的完整路径
 rem ------------------------------------------------------------
 :detect_jdks
 set "JDK17="
@@ -187,7 +181,6 @@ if defined JDKVAL (
 exit /b 0
 
 rem ------------------------------------------------------------
-rem 写入 gradle.properties：主 JDK + toolchain 路径
 rem ------------------------------------------------------------
 :update_props
 if not exist "%PROPS_FILE%" (
@@ -235,11 +228,10 @@ if defined JDK25 (
 exit /b 0
 
 rem ------------------------------------------------------------
-rem Gradle 8.9（Forge 构建专用）
 rem ------------------------------------------------------------
 :ensure_gradle89
 echo.
-echo ==^> Gradle 8.9 (Forge 构建专用)
+echo ==^> Gradle 8.9 (Forge builds only)
 if exist "%GRADLE89_BIN%" (
     echo     [OK] Already present at %GRADLE89_DIR%
     exit /b 0
@@ -278,7 +270,6 @@ echo     [OK] Extracted to %GRADLE89_DIR%
 exit /b 0
 
 rem ------------------------------------------------------------
-rem 预拉取依赖
 rem ------------------------------------------------------------
 :prefetch_default
 echo.

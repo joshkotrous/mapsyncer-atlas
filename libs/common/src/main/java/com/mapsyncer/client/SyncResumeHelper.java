@@ -10,10 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
-/**
- * 客户端加入服务器时检测未完成同步。
- * 仅在服务端未启用加入自动同步（增量更新关闭）时提示断点续传。
- */
 public class SyncResumeHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncResumeHelper.class);

@@ -85,6 +85,6 @@ tasks.register('mapPackagerDist', Zip) {
     }
 
     doLast {
-        logger.lifecycle("MapPackager 发布包: ${archiveFile.get().asFile.absolutePath}")
+        logger.lifecycle("MapPackager release archive: ${archiveFile.get().asFile.absolutePath}")
     }
 }

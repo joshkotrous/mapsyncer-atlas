@@ -25,9 +25,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-/**
- * Forge 1.21 网络处理器实现
- */
 public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object> {
 
     private static final SimpleChannel CHANNEL = ChannelBuilder
@@ -38,7 +35,6 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
 
     private static volatile boolean initialized = false;
 
-    /** 已确认安装 MapSyncer 的客户端 — 仅对这些玩家发送自定义 payload */
     static final Set<UUID> confirmedPlayers = ConcurrentHashMap.newKeySet();
 
     private BiConsumer<SyncResponsePayload, PayloadContext> syncResponseHandler;
@@ -47,7 +43,7 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
     private BiConsumer<SyncRequestPayload, PayloadContext> syncRequestHandler;
 
     public void init() {
-        // 同步请求（客户端 -> 服务端）：收到即确认该客户端安装了 MapSyncer
+
         CHANNEL.messageBuilder(ForgeSyncRequestMessage.class, 0, NetworkDirection.PLAY_TO_SERVER)
             .encoder(ForgeSyncRequestMessage::encode)
             .decoder(ForgeSyncRequestMessage::decode)
@@ -61,7 +57,6 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
             })
             .add();
 
-        // 同步响应（服务端 -> 客户端）
         CHANNEL.messageBuilder(ForgeSyncResponseMessage.class, 1, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(ForgeSyncResponseMessage::encode)
             .decoder(ForgeSyncResponseMessage::decode)
@@ -72,7 +67,6 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
             })
             .add();
 
-        // 同步进度（服务端 -> 客户端）
         CHANNEL.messageBuilder(ForgeSyncProgressMessage.class, 2, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(ForgeSyncProgressMessage::encode)
             .decoder(ForgeSyncProgressMessage::decode)
@@ -83,7 +77,6 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
             })
             .add();
 
-        // 服务端已安装通知（服务端 -> 客户端）
         CHANNEL.messageBuilder(ForgeServerInstalledMessage.class, 3, NetworkDirection.PLAY_TO_CLIENT)
             .encoder(ForgeServerInstalledMessage::encode)
             .decoder(ForgeServerInstalledMessage::decode)
@@ -169,12 +162,10 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
         return null;
     }
 
-    /** 确认客户端安装了 MapSyncer（收到客户端请求时调用） */
     public static void confirmPlayer(UUID playerId) {
         confirmedPlayers.add(playerId);
     }
 
-    /** 玩家断线时清理确认状态 */
     public static void onPlayerDisconnect(UUID playerId) {
         confirmedPlayers.remove(playerId);
     }

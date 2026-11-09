@@ -5,7 +5,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
 
-/** 用真实 ZIP 和多世界目录验证原地复用、更新检测及强制生成的清理范围。 */
 public final class SharedXaeroCacheRegression {
     private static int checks;
     private static void check(boolean condition, String message) {

@@ -19,14 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-/**
- * NeoForge 网络处理器实现
- */
 public class NeoForgeNetworkHandler implements NetworkHandler<ServerPlayer, RegisterPayloadHandlersEvent> {
 
     private final AtomicBoolean payloadsRegistered = new AtomicBoolean(false);
 
-    /** 已确认安装了 MapSyncer 的玩家 — 仅对这些玩家发送自定义 payload */
     private final Set<UUID> confirmedPlayers = ConcurrentHashMap.newKeySet();
 
     private BiConsumer<SyncResponsePayload, PayloadContext> syncResponseHandler;
@@ -40,7 +36,6 @@ public class NeoForgeNetworkHandler implements NetworkHandler<ServerPlayer, Regi
 
         PayloadRegistrar registrar = event.registrar("1").optional();
 
-        // 同步请求（客户端 -> 服务端）：收到即确认该客户端安装了 MapSyncer
         registrar.playToServer(
             NeoForgePayloadAdapters.NeoForgeSyncRequestPayload.TYPE,
             NeoForgePayloadAdapters.NeoForgeSyncRequestPayload.STREAM_CODEC,
@@ -54,7 +49,6 @@ public class NeoForgeNetworkHandler implements NetworkHandler<ServerPlayer, Regi
             }
         );
 
-        // 同步响应（服务端 -> 客户端）
         registrar.playToClient(
             NeoForgePayloadAdapters.NeoForgeSyncResponsePayload.TYPE,
             NeoForgePayloadAdapters.NeoForgeSyncResponsePayload.STREAM_CODEC,
@@ -65,7 +59,6 @@ public class NeoForgeNetworkHandler implements NetworkHandler<ServerPlayer, Regi
             }
         );
 
-        // 同步进度（服务端 -> 客户端）
         registrar.playToClient(
             NeoForgePayloadAdapters.NeoForgeSyncProgressPayload.TYPE,
             NeoForgePayloadAdapters.NeoForgeSyncProgressPayload.STREAM_CODEC,
@@ -76,7 +69,6 @@ public class NeoForgeNetworkHandler implements NetworkHandler<ServerPlayer, Regi
             }
         );
 
-        // 服务端已安装通知（服务端 -> 客户端）
         registrar.playToClient(
             NeoForgePayloadAdapters.NeoForgeServerInstalledPayload.TYPE,
             NeoForgePayloadAdapters.NeoForgeServerInstalledPayload.STREAM_CODEC,
@@ -123,7 +115,6 @@ public class NeoForgeNetworkHandler implements NetworkHandler<ServerPlayer, Regi
         }
     }
 
-    /** 玩家断线时清理确认状态 */
     public void onPlayerDisconnect(UUID playerId) {
         confirmedPlayers.remove(playerId);
     }

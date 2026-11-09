@@ -5,7 +5,6 @@ import java.lang.reflect.*;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** 房主本地增量失效适配器。Xaero 未安装/接口不兼容时由调用者停用，不影响访客收包链路。 */
 public final class XaeroHostMapRefresh {
     private static final String REASON = "MapSyncer host source changed";
     private static final ClassValue<ConcurrentHashMap<String, Method>> METHODS = new ClassValue<>() {
@@ -50,7 +49,6 @@ public final class XaeroHostMapRefresh {
         return field.get(object);
     }
 
-    /** 只使用 Xaero 自身当前视图的真实来源，不从维度/地图名字猜测。 */
     public static Context context(Object processor) throws ReflectiveOperationException {
         if (processor == null || (boolean) call(processor, "isWaitingForWorldUpdate")) return null;
         String world = (String) call(processor, "getCurrentWorldId");
@@ -95,7 +93,6 @@ public final class XaeroHostMapRefresh {
         return (boolean) call(region, "reloadHasBeenRequested") || state == 1 || state == 3;
     }
 
-    /** 在客户端/渲染主线程调用。持有 Xaero 原生 loadingSync 时只做短操作，忙碌则重试，不阻塞等 IO。 */
     public static Result invalidate(Context context, Path file, int x, int z) throws ReflectiveOperationException {
         return invalidate(context, file, x, z, true);
     }
@@ -116,7 +113,7 @@ public final class XaeroHostMapRefresh {
                     || (boolean) call(region, "isRefreshing"))) return new Result(false, null);
 
             Object detection = call(layer, "getRegionDetection", x, z);
-            // 启动/重新开启时仅补齐缺失或落后的缓存，不把所有历史区域强制重建一遍。
+
             if (!contentChanged && (region != null || detection != null)) {
                 File cache = (File) call(saveLoad, "getCacheFile", region == null ? detection : region,
                         context.layer(), false, false);
@@ -133,14 +130,13 @@ public final class XaeroHostMapRefresh {
             }
             if (detection != null) call(detection, "setShouldCache", true, REASON);
 
-            // 未加载的区域只登记失效，不为每次磁盘写入创建整张地图的像素对象。
             if (region != null) {
                 if ((byte) call(region, "getLoadState") == 2) call(region, "clearRegion", processor);
                 call(region, "setHasHadTerrain");
                 call(region, "setShouldCache", true, REASON);
                 call(saveLoad, "requestLoad", region, REASON, false);
             }
-            // 沿用原生的父级版本检查，缩小世界地图时也能重新显示新增区域。
+
             for (int level = 1; level <= 3; level++) {
                 Object parent = call(regions, "get", context.layer(), x >> level, z >> level, level);
                 if (parent != null) {

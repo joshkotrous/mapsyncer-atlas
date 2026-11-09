@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.zip.*;
 import java.io.*;
 
-/** 文件系统事件、关闭隔离、视距边界以及 Xaero 加载契约；不伪造网络请求。 */
 public final class HostSilentMapRegression {
     static int checks;
     static void check(boolean condition, String message) {

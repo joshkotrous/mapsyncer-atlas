@@ -5,10 +5,6 @@ import com.mapsyncer.mca.ChunkSectionParser;
 
 import static com.mapsyncer.mca.convert.model.ConvertConstants.DEFAULT_BIOME;
 
-/**
- * 按 quart（4×4×4）精度解析 chunk 内 biome，对齐 Xaero fillBiomes 的采样方式。
- * 不包含邻域 region chunk 加载。
- */
 public final class BiomeQuartResolver {
 
     private BiomeQuartResolver() {}
@@ -17,10 +13,6 @@ public final class BiomeQuartResolver {
         return resolve(chunk, lx, absoluteY, lz, false);
     }
 
-    /**
-     * 仅在指定 Y 及其 section 内解析 biome，不回退到高度图地表 Y。
-     * 洞穴层采样时使用，避免 Y=63 的像素被替换成 Y=127 的地表群系。
-     */
     public static String resolveAtY(ChunkDataParser.ChunkInfo chunk, int lx, int absoluteY, int lz) {
         return resolveAtY(chunk, lx, absoluteY, lz, false);
     }

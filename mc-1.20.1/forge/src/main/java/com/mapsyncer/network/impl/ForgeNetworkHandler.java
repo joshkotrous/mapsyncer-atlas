@@ -26,15 +26,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-/**
- * Forge 网络处理器实现（传统 SimpleNetworkWrapper 方式）
- */
 public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object> {
 
     private static final String PROTOCOL_VERSION = "1";
     private static SimpleChannel CHANNEL;
 
-    /** 已确认安装 MapSyncer 的客户端 — 仅对这些玩家发送自定义 payload */
     static final Set<UUID> confirmedPlayers = ConcurrentHashMap.newKeySet();
 
     private BiConsumer<SyncResponsePayload, PayloadContext> syncResponseHandler;
@@ -170,12 +166,10 @@ public class ForgeNetworkHandler implements NetworkHandler<ServerPlayer, Object>
         return forgeCtx.get().getSender();
     }
 
-    /** 确认客户端安装了 MapSyncer（收到客户端请求时调用） */
     public static void confirmPlayer(UUID playerId) {
         confirmedPlayers.add(playerId);
     }
 
-    /** 玩家断线时清理确认状态 */
     public static void onPlayerDisconnect(UUID playerId) {
         confirmedPlayers.remove(playerId);
     }

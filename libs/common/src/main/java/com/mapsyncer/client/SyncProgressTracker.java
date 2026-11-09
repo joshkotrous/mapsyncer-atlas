@@ -9,10 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/**
- * 同步进度追踪器。
- * 进度数据仅在 update 时写入；刷新 action bar 时统一读取当前状态。
- */
 public class SyncProgressTracker {
 
     private static volatile boolean tracking = false;
@@ -25,10 +21,8 @@ public class SyncProgressTracker {
     private static volatile long startTime = 0;
     private static volatile boolean receivedFirstResponse = false;
 
-    /** 服务端首次响应超时（比对大量 region 可能较慢） */
     private static final long SERVER_RESPONSE_TIMEOUT_MS = 60_000;
 
-    /** Action bar 约 3 秒消失，每 40 tick（2 秒）重发一次 */
     private static final int OVERLAY_REFRESH_TICKS = 40;
 
     private static volatile boolean overlayActive = false;
@@ -37,7 +31,6 @@ public class SyncProgressTracker {
     private static volatile ScheduledExecutorService timeoutChecker = null;
     private static volatile java.util.concurrent.ScheduledFuture<?> timeoutFuture = null;
 
-    /** 服务端在线但首次响应超时的回调（用于自动重发同步请求） */
     public interface TimeoutCallback {
         void onTimeout();
     }
@@ -96,9 +89,6 @@ public class SyncProgressTracker {
         }
     }
 
-    /**
-     * 由 ClientTick 每 tick 调用；到间隔时读取当前进度并刷新 action bar。
-     */
     public static void onClientTick() {
         if (!overlayActive) {
             return;
@@ -199,13 +189,11 @@ public class SyncProgressTracker {
         }
     }
 
-    /** 进度变更后立即刷新（哈希扫描可能在后台线程调用） */
     private static void scheduleOverlayRefresh() {
         Minecraft mc = Minecraft.getInstance();
         mc.execute(SyncProgressTracker::refreshOverlay);
     }
 
-    /** 读取当前进度状态，渲染 action bar */
     private static void refreshOverlay() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !overlayActive) {
@@ -277,7 +265,7 @@ public class SyncProgressTracker {
                             ClientMessageHelper.sendChatMessage(ChatUtils.error("mapsyncer.sync.server_not_installed"));
                             cancelTracking();
                         } else {
-                            // 服务端在线但未响应：触发重发回调（穿透丢包/分包未到齐兜底）
+
                             TimeoutCallback cb = timeoutCallback;
                             if (cb != null) {
                                 cb.onTimeout();

@@ -15,15 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Forge Payload 适配器（传统消息方式）
- *
- * Forge 1.20.1 使用 SimpleNetworkWrapper，消息类不需要实现 CustomPacketPayload 接口。
- * 只需要提供 encode/decode 方法供 SimpleChannel 使用。
- */
 public class ForgePayloadAdapters {
-
-    // ===== 同步请求消息 =====
 
     public static class ForgeSyncRequestMessage {
         private final SyncRequestPayload data;
@@ -44,8 +36,6 @@ public class ForgePayloadAdapters {
             return new ForgeSyncRequestMessage(SyncRequestWireCodec.read(buf));
         }
     }
-
-    // ===== 同步响应消息 =====
 
     public static class ForgeSyncResponseMessage {
         private final SyncResponsePayload data;
@@ -81,8 +71,6 @@ public class ForgePayloadAdapters {
         }
     }
 
-    // ===== 同步进度消息 =====
-
     public static class ForgeSyncProgressMessage {
         private final SyncProgressPayload data;
 
@@ -105,8 +93,6 @@ public class ForgePayloadAdapters {
         }
     }
 
-    // ===== 服务端已安装消息 =====
-
     public static class ForgeServerInstalledMessage {
         private final ServerInstalledPayload data;
 
@@ -126,8 +112,6 @@ public class ForgePayloadAdapters {
             return new ForgeServerInstalledMessage(ServerInstalledWireCodec.read(buf));
         }
     }
-
-    // ===== ChunkMapData 序列化 =====
 
     private static void encodeChunkMapData(FriendlyByteBuf buf, ChunkMapData data) {
         buf.writeInt(data.regionX);

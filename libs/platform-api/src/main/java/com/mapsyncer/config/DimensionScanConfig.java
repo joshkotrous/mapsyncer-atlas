@@ -2,12 +2,6 @@ package com.mapsyncer.config;
 
 import com.mapsyncer.mca.DimensionTypeInfo;
 
-/**
- * 维度扫描配置记录。
- *
- * <p>层生成由 {@link LayerPlan} 与运行时 {@link DimensionTypeInfo} 共同决定，
- * 不再区分独立的 SURFACE/CAVE 扫描模式字段。</p>
- */
 public record DimensionScanConfig(
     String dimension,
     LayerPlan layerPlan,
@@ -17,7 +11,6 @@ public record DimensionScanConfig(
         this(dimension, layerPlan, null);
     }
 
-    /** 保留供日志等兼容；新配置请使用 {@link #layerPlan()} */
     @Deprecated
     public ScanMode scanMode() {
         if (layerPlan.includeSurface() && !layerPlan.includeAllCaves() && layerPlan.caveStarts().isEmpty()) {
@@ -33,9 +26,6 @@ public record DimensionScanConfig(
         return layerPlan.primaryCaveStart();
     }
 
-    /**
-     * 单 pass 场景下的洞穴层号；多 pass 时请使用 {@link RegionGenerationPlanner}。
-     */
     public int getCaveLayer() {
         if (layerPlan.includeSurface() && !layerPlan.includeAllCaves() && layerPlan.caveStarts().isEmpty()) {
             return Integer.MAX_VALUE;

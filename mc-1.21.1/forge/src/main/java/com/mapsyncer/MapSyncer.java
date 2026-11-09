@@ -36,12 +36,6 @@ import net.minecraftforge.event.TickEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * MapSyncer模组的主类 - Forge 1.21.1 版本
- *
- * Forge 1.21.1 使用 ChannelBuilder API 进行网络注册，
- * 网络层在 ForgeNetworkHandler 的静态初始化中完成注册。
- */
 @Mod(MapSyncer.MOD_ID)
 public class MapSyncer {
 
@@ -54,26 +48,21 @@ public class MapSyncer {
         ModContainer modContainer = ModLoadingContext.get().getActiveContainer();
         VERSION = modContainer.getModInfo().getVersion().toString();
 
-        // 初始化 Platform（Forge 1.21.1 实现）
         PlatformManager.initialize(new ForgePlatform());
         LOGGER.info("Platform initialized: {}", PlatformManager.getPlatform().getPlatformName());
 
-        // 初始化 DimensionPathMapping（1.21.X 使用传统格式）
         DimensionPathMapping.getInstance().initialize(21);
         LOGGER.info("DimensionPathMapping initialized for version 1.21.X");
 
-        // 注册配置文件（Forge 1.21.1 使用 ModLoadingContext）
         ModLoadingContext.get().registerConfig(Type.SERVER, ModConfig.SERVER_SPEC);
         ModLoadingContext.get().registerConfig(Type.CLIENT, ModConfig.CLIENT_SPEC);
         modBus.addListener((net.minecraftforge.fml.event.config.ModConfigEvent.Loading event) ->
                 ModConfig.bindServerConfig(event.getConfig()));
 
-        // 创建网络处理器实例
         ForgeNetworkHandler networkHandler = new ForgeNetworkHandler();
         NetworkManager.initialize(networkHandler);
         LOGGER.info("NetworkManager initialized for Forge 1.21.1");
 
-        // 注册网络处理器（客户端和服务端共用）
         networkHandler.registerHandlers(null);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
@@ -82,7 +71,6 @@ public class MapSyncer {
             LOGGER.info("MapSyncer initialized (client mode, Forge 1.21.1)");
         }
 
-        // 服务端处理器始终注册，内置服务器/纯客户端上无副作用（事件不触发）
         ServerSyncHandlerLogic.registerHandlers();
         MinecraftForge.EVENT_BUS.register(this);
         LOGGER.info("MapSyncer server handlers registered (integrated server support)");

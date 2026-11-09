@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
-/** 仅监听当前地图的数据目录；后台合并落盘事件，不保存世界、不生成地图、不发送网络包。 */
 public final class HostMapFileWatcher implements AutoCloseable {
     public record Change(Path file, int x, int z, boolean contentChanged) {}
     private record Pending(Change change, long after) {}
@@ -42,7 +41,6 @@ public final class HostMapFileWatcher implements AutoCloseable {
 
     public IOException failure() { return failure; }
 
-    /** 从客户端主线程调用；不执行磁盘 IO。 */
     public synchronized Change poll() {
         var iterator = ready.entrySet().iterator();
         if (!iterator.hasNext()) return null;
@@ -51,7 +49,6 @@ public final class HostMapFileWatcher implements AutoCloseable {
         return change;
     }
 
-    /** Xaero 忙碌或区域仍在近处：保留变更，不能覆盖后来到达的新事件。 */
     public synchronized void retry(Change change) {
         if (!closed && !pending.containsKey(change.file()) && !ready.containsKey(change.file())) {
             pending.put(change.file(), new Pending(change, System.nanoTime() + SETTLE_NANOS));
@@ -74,7 +71,7 @@ public final class HostMapFileWatcher implements AutoCloseable {
             Change change = new Change(file, Integer.parseInt(match.group(1)), Integer.parseInt(match.group(2)), changed);
             ready.remove(file);
             pending.put(file, new Pending(change, System.nanoTime() + SETTLE_NANOS));
-        } catch (NumberFormatException ignored) { /* 非法坐标文件不进入原生地图加载器。 */ }
+        } catch (NumberFormatException ignored) {   }
     }
 
     private void updateRegistration() throws IOException {
@@ -126,12 +123,12 @@ public final class HostMapFileWatcher implements AutoCloseable {
                     waitingForZip = true;
                     try (ZipFile zip = new ZipFile(file.toFile())) { valid = zip.size() > 0; }
                 }
-            } catch (IOException ignored) { /* 等待文件写完或原子替换结束。 */ }
+            } catch (IOException ignored) {   }
             synchronized (this) {
                 if (pending.get(file) != item) continue;
                 pending.remove(file);
                 if (valid) ready.put(file, item.change());
-                // 空 MCA 常由预生成器提前创建；只在下一次写事件后重查，避免长期空轮询。
+
                 else if (exists && waitingForZip) pending.put(file, new Pending(item.change(), System.nanoTime() + SETTLE_NANOS));
             }
         }

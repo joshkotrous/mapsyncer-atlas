@@ -102,7 +102,7 @@ public final class ChunkColumnScanner {
                     if (isCaveMode && sectionTopY > startY) {
                         continue;
                     }
-                    // 整段在扫描底以下才跳过（用 sectionTopY，不能用 sectionBottomY）
+
                     if (sectionTopY < scanBottomY) {
                         continue;
                     }

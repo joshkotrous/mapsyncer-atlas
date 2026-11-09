@@ -19,15 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * NeoForge Payload 适配器
- *
- * 将平台无关的 Payload DTO 适配到 NeoForge 的 CustomPacketPayload 接口。
- * 每个适配器包含 StreamCodec 用于网络序列化。
- */
 public class NeoForgePayloadAdapters {
-
-    // ===== 同步请求适配器 =====
 
     public record NeoForgeSyncRequestPayload(SyncRequestPayload data) implements CustomPacketPayload {
         public static final Type<NeoForgeSyncRequestPayload> TYPE =
@@ -49,8 +41,6 @@ public class NeoForgePayloadAdapters {
             return new NeoForgeSyncRequestPayload(SyncRequestWireCodec.read(buf));
         }
     }
-
-    // ===== 同步响应适配器 =====
 
     public record NeoForgeSyncResponsePayload(SyncResponsePayload data) implements CustomPacketPayload {
         public static final Type<NeoForgeSyncResponsePayload> TYPE =
@@ -87,8 +77,6 @@ public class NeoForgePayloadAdapters {
         }
     }
 
-    // ===== 同步进度适配器 =====
-
     public record NeoForgeSyncProgressPayload(SyncProgressPayload data) implements CustomPacketPayload {
         public static final Type<NeoForgeSyncProgressPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(MapSyncer.MOD_ID, NetworkHandler.SYNC_PROGRESS_ID));
@@ -112,8 +100,6 @@ public class NeoForgePayloadAdapters {
         }
     }
 
-    // ===== 服务端已安装适配器 =====
-
     public record NeoForgeServerInstalledPayload(ServerInstalledPayload data) implements CustomPacketPayload {
         public static final Type<NeoForgeServerInstalledPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(MapSyncer.MOD_ID, NetworkHandler.SERVER_INSTALLED_ID));
@@ -134,8 +120,6 @@ public class NeoForgePayloadAdapters {
             return new NeoForgeServerInstalledPayload(ServerInstalledWireCodec.read(buf));
         }
     }
-
-    // ===== ChunkMapData 序列化（共享逻辑）=====
 
     private static void encodeChunkMapData(RegistryFriendlyByteBuf buf, ChunkMapData data) {
         buf.writeInt(data.regionX);

@@ -68,9 +68,8 @@ function Test-Rules([object]$rules) {
 }
 
 function Expand-Placeholders([string]$value) {
-    # 默认测试账号 CodexTester 的离线 UUID，与专用服务端 usercache.json 保持一致。
-    # 离线服务端不会使用客户端传入的占位 UUID，而会按用户名生成该值；
-    # 改用 -Username 时需同步更新这里和 ops.json。
+    # Offline UUIDs derive from usernames; keep the dedicated server usercache and ops in sync.
+    # Offline UUIDs derive from usernames; keep the dedicated server usercache and ops in sync.
     $map = @{
         '${auth_player_name}' = $Username
         '${version_name}' = $VersionId

@@ -11,12 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * 根据层计划与运行时维度类型，生成 region 的多 pass 扫描计划。
- *
- * <p>{@code SURFACE} 仅生成地表（有顶盖维度为逻辑顶以上，否则为全列地表）。
- * {@code ALL} 生成维度高度范围内的全部洞穴层。显式 Y 坐标与 {@code ALL} 按层号自动去重。</p>
- */
 public final class RegionGenerationPlanner {
 
     private static final int CAVE_LAYER_DEPTH = 15;

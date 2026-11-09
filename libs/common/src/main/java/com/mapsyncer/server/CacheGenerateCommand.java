@@ -19,24 +19,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-/**
- * 缓存生成命令 - 注册和处理/mapsyncer命令
- *
- * 提供以下命令：
- * - /mapsyncer help - 显示帮助信息
- * - /mapsyncer generate - 生成所有维度的地图缓存
- * - /mapsyncer generate <dimension> - 生成指定维度的地图缓存
- * - /mapsyncer generate <dimension> --force - 强制重新生成指定维度
- * - /mapsyncer generate <dimension> <x> <z> - 生成指定区域的地图缓存
- * - /mapsyncer status - 显示当前生成状态
- * - /{prefix} incremental - 查看当前增量更新模式
- * - /{prefix} incremental off/tick/scheduled - 配置增量更新模式
- *
- * 维度参数使用原版 {@link DimensionArgument}，支持 namespace:path 且可安全序列化。
- *
- * 需要管理员权限（permission level 4）才能执行。
- * 命令前缀由各 Loader 传入：Fabric 为 {@code mapsyncerserver}，Forge/NeoForge 为 {@code mapsyncer}。
- */
 public class CacheGenerateCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, String prefix) {

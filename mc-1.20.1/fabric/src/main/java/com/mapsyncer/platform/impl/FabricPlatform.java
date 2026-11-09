@@ -27,9 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * Fabric 1.20.1 平台实现
- */
 public class FabricPlatform implements Platform {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FabricPlatform.class);
@@ -71,8 +68,6 @@ public class FabricPlatform implements Platform {
     public boolean isClientEnvironment() {
         return net.fabricmc.loader.api.FabricLoader.getInstance().getEnvironmentType() == net.fabricmc.api.EnvType.CLIENT;
     }
-
-    // ===== 方块属性 =====
 
     @Override
     public BlockProperties getBlockProperties(String blockName) {
@@ -131,8 +126,6 @@ public class FabricPlatform implements Platform {
         return BlockColorMapper.getBlockColorByName(blockName);
     }
 
-    // ===== 世界信息 =====
-
     @Override
     public int getDefaultMinBuildHeight() {
         return -64;
@@ -143,8 +136,6 @@ public class FabricPlatform implements Platform {
         return 320;
     }
 
-    // ===== 维度信息 =====
-
     @Override
     public String getXaeroDimensionPath(String dimensionId) {
         return DimensionPathMapping.getInstance().toXaeroDimension(dimensionId);
@@ -154,8 +145,6 @@ public class FabricPlatform implements Platform {
     public DimensionTypeInfo getDimensionTypeInfo(String dimensionId) {
         return DimensionTypeInfo.fromDimensionId(dimensionId);
     }
-
-    // ===== 配置系统 =====
 
     @Override
     public int getSyncRadiusRegions() { return ModConfig.SERVER().getSyncRadiusRegions(); }
@@ -279,8 +268,6 @@ public class FabricPlatform implements Platform {
         return ModConfig.SERVER().getConfigForDimension(dimensionPath);
     }
 
-    // ===== 文件路径 =====
-
     @Override
     public Path getServerMapCacheDir() {
         if (server != null) {
@@ -319,14 +306,10 @@ public class FabricPlatform implements Platform {
         return "Multiplayer_Server";
     }
 
-    // ===== 日志 =====
-
     @Override
     public Logger getLogger() {
         return LOGGER;
     }
-
-    // ===== 工具方法 =====
 
     @Override
     public boolean matchesBlockPattern(String blockName, String pattern) {

@@ -15,13 +15,6 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-/**
- * Fabric 26.x 网络处理器实现
- *
- * <p>使用 Fabric Networking API v1 (PayloadTypeRegistry + CustomPacketPayload + StreamCodec)</p>
- * <p>Payload DTOs 在 platform-api 中定义为平台无关的纯 record，通过 FabricPayloadAdapters 包装为 CustomPacketPayload。</p>
- * <p>类型安全：PLAYER_TYPE=ServerPlayer, EVENT_TYPE=Object</p>
- */
 public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object> {
 
     private BiConsumer<SyncResponsePayload, PayloadContext> syncResponseHandler;
@@ -29,15 +22,11 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
     private BiConsumer<ServerInstalledPayload, PayloadContext> serverInstalledHandler;
     private BiConsumer<SyncRequestPayload, PayloadContext> syncRequestHandler;
 
-    /** 防止 Payload 类型被重复注册（集成客户端环境下 main + client 入口点各调用一次） */
     private final AtomicBoolean payloadTypesRegistered = new AtomicBoolean(false);
 
-    /**
-     * 注册 Payload 类型到 PayloadTypeRegistry（幂等操作）
-     */
     private void registerPayloadTypes() {
         if (!payloadTypesRegistered.compareAndSet(false, true)) {
-            return; // 已注册过，跳过
+            return;
         }
 
         PayloadTypeRegistry.serverboundPlay().register(
@@ -60,10 +49,9 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
 
     @Override
     public void registerHandlers(Object event) {
-        // 注册 Payload 类型
+
         registerPayloadTypes();
 
-        // 注册服务端接收器
         ServerPlayNetworking.registerGlobalReceiver(FabricPayloadAdapters.SYNC_REQUEST_TYPE, (wrapper, context) -> {
             if (syncRequestHandler != null) {
                 syncRequestHandler.accept(wrapper.payload(), new PayloadContext(context));
@@ -71,11 +59,8 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
         });
     }
 
-    /**
-     * 注册客户端接收器（在客户端初始化时调用）
-     */
     public void registerClientHandlers() {
-        // 确保 payload 类型已注册（客户端可能在服务端之前初始化）
+
         registerPayloadTypes();
 
         ClientPlayNetworking.registerGlobalReceiver(FabricPayloadAdapters.SYNC_RESPONSE_TYPE, (wrapper, context) -> {
@@ -145,7 +130,7 @@ public class FabricNetworkHandler implements NetworkHandler<ServerPlayer, Object
 
     @Override
     public void enqueueWork(PayloadContext context, Runnable work) {
-        // Fabric 的 context 已经提供了线程安全的执行方式
+
         Object platformCtx = context.getPlatformContext();
         if (platformCtx instanceof ServerPlayNetworking.Context serverCtx) {
             serverCtx.server().execute(work);

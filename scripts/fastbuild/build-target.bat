@@ -1,15 +1,12 @@
 @echo off
 chcp 65001 >nul
-rem MapSyncer 分版本构建入口（纯 cmd）
 rem
-rem 用法:
 rem   build-target.bat fabric-1.21.1
 rem   build-target.bat forge-1.20.1
 rem   build-target.bat all
 rem   build-target.bat packager
 rem   build-target.bat core
 rem
-rem -Clean / -NoTest 为兼容参数；各目标脚本默认执行 clean 并跳过测试。
 setlocal EnableExtensions EnableDelayedExpansion
 
 for %%I in ("%~dp0..\..") do set "PROJECT_ROOT=%%~sI"

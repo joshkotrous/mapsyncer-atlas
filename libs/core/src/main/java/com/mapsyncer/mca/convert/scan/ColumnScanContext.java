@@ -10,7 +10,7 @@ public final class ColumnScanContext {
 
     public final boolean[] blockFound = new boolean[256];
     public final boolean[] underair = new boolean[256];
-    /** 洞穴模式：扫描起点处尚未进入洞穴内部（参考 Xaero shouldEnterGround） */
+
     public final boolean[] shouldEnterGround = new boolean[256];
     @SuppressWarnings("unchecked")
     public final ArrayList<OverlayEntry>[] overlayLists = new ArrayList[256];
@@ -24,22 +24,17 @@ public final class ColumnScanContext {
         }
     }
 
-    /** 进入空气区域（Xaero: 遇 air 设 underair=true） */
     void onAir(int pos) {
         underair[pos] = true;
         shouldEnterGround[pos] = false;
     }
 
-    /**
-     * 流体触发 underair（Xaero MapWriter: 除非 cave && shouldEnterGround，否则设 underair）
-     */
     void onFluid(int pos, boolean isCaveMode) {
         if (!isCaveMode || !shouldEnterGround[pos]) {
             underair[pos] = true;
         }
     }
 
-    /** 洞穴模式：只有 underair 后才可记录实体方块/overlay */
     boolean canProcessCaveBlock(int pos, boolean isCaveMode) {
         return !isCaveMode || underair[pos];
     }

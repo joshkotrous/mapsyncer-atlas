@@ -27,14 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 
-/**
- * Forge 1.21.11 平台实现
- *
- * 主要差异点：
- * - Forge 1.21.11 使用 Java 21
- * - SimpleNetworkWrapper 网络（非 StreamCodec）
- * - BuiltInRegistries 注册表
- */
 public class ForgePlatform implements Platform {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ForgePlatform.class);
@@ -50,7 +42,6 @@ public class ForgePlatform implements Platform {
     public String getServerCommandPrefix() {
         return "mapsyncer";
     }
-
 
     @Override
     public String getMinecraftVersion() {
@@ -71,8 +62,6 @@ public class ForgePlatform implements Platform {
     public boolean isClientEnvironment() {
         return net.minecraftforge.fml.loading.FMLEnvironment.dist == net.minecraftforge.api.distmarker.Dist.CLIENT;
     }
-
-    // ===== 方块属性 =====
 
     @Override
     public BlockProperties getBlockProperties(String blockName) {
@@ -131,8 +120,6 @@ public class ForgePlatform implements Platform {
         return BlockColorMapper.getBlockColorByName(blockName);
     }
 
-    // ===== 世界信息 =====
-
     @Override
     public int getDefaultMinBuildHeight() {
         return -64;
@@ -143,8 +130,6 @@ public class ForgePlatform implements Platform {
         return 320;
     }
 
-    // ===== 维度信息 =====
-
     @Override
     public String getXaeroDimensionPath(String dimensionId) {
         return DimensionPathMapping.getInstance().toXaeroDimension(dimensionId);
@@ -154,8 +139,6 @@ public class ForgePlatform implements Platform {
     public DimensionTypeInfo getDimensionTypeInfo(String dimensionId) {
         return DimensionTypeInfo.fromDimensionId(dimensionId);
     }
-
-    // ===== 配置系统 =====
 
     @Override
     public int getSyncRadiusRegions() { return ModConfig.SERVER.syncRadiusRegions.get(); }
@@ -279,8 +262,6 @@ public class ForgePlatform implements Platform {
         return ModConfig.SERVER.getConfigForDimension(dimensionPath);
     }
 
-    // ===== 文件路径 =====
-
     @Override
     public Path getServerMapCacheDir() {
         return Path.of("server_map_cache");
@@ -317,14 +298,10 @@ public class ForgePlatform implements Platform {
         return "Multiplayer_Server";
     }
 
-    // ===== 日志 =====
-
     @Override
     public Logger getLogger() {
         return LOGGER;
     }
-
-    // ===== 工具方法 =====
 
     @Override
     public boolean matchesBlockPattern(String blockName, String pattern) {

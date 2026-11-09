@@ -19,47 +19,22 @@ import com.mapsyncer.config.DimensionConfigParser;
 import com.mapsyncer.config.DimensionScanConfig;
 import com.mapsyncer.config.ScanMode;
 
-/**
- * Mod 配置类 - Fabric 版本
- *
- * 使用 Cloth Config API 进行配置管理，配置文件使用 Properties 格式存储。
- *
- * <p>管理 MapSyncer for XaeroWorldMap 的配置，包括:</p>
- * <ul>
- *   <li>客户端设置（哈希计算线程数等）</li>
- *   <li>服务器端设置（调试日志、并发限制等）</li>
- *   <li>增量更新设置（更新模式、时间间隔）</li>
- *   <li>维度扫描配置（扫描模式、起始高度等）</li>
- * </ul>
- */
 public class ModConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModConfig.class);
 
-    /** 服务端配置文件名 */
     private static final String SERVER_CONFIG_FILE_NAME = "mapsyncer-server.properties";
 
-    /** 客户端配置文件名 */
     private static final String CLIENT_CONFIG_FILE_NAME = "mapsyncer-client.properties";
 
-    /** 服务端配置单例实例 */
     private static volatile ServerConfig serverInstance;
 
-    /** 客户端配置单例实例 */
     private static volatile ClientConfig clientInstance;
 
-    /** 服务端配置文件路径 */
     private static volatile Path serverConfigPath;
 
-    /** 客户端配置文件路径 */
     private static volatile Path clientConfigPath;
 
-    /**
-     * 获取服务端配置实例
-     *
-     * @param configDir 配置目录路径（通常是世界目录下的 serverconfig 目录）
-     * @return 服务端配置实例
-     */
     public static ServerConfig getServerConfig(Path configDir) {
         if (serverInstance == null) {
             synchronized (ServerConfig.class) {
@@ -73,12 +48,6 @@ public class ModConfig {
         return serverInstance;
     }
 
-    /**
-     * 获取客户端配置实例
-     *
-     * @param configDir 配置目录路径（通常是游戏目录下的 config 目录）
-     * @return 客户端配置实例
-     */
     public static ClientConfig getClientConfig(Path configDir) {
         if (clientInstance == null) {
             synchronized (ClientConfig.class) {
@@ -92,9 +61,6 @@ public class ModConfig {
         return clientInstance;
     }
 
-    /**
-     * 重置配置实例（用于测试或服务器重启）
-     */
     public static void resetInstance() {
         if (serverInstance != null) {
             serverInstance = null;
@@ -108,9 +74,6 @@ public class ModConfig {
         }
     }
 
-    /**
-     * 获取当前服务端配置实例
-     */
     public static ServerConfig SERVER() {
         if (serverInstance == null) {
             throw new IllegalStateException("ServerConfig not initialized. Call getServerConfig() first.");
@@ -118,9 +81,6 @@ public class ModConfig {
         return serverInstance;
     }
 
-    /**
-     * 获取当前客户端配置实例
-     */
     public static ClientConfig CLIENT() {
         if (clientInstance == null) {
             throw new IllegalStateException("ClientConfig not initialized. Call getClientConfig() first.");
@@ -128,55 +88,30 @@ public class ModConfig {
         return clientInstance;
     }
 
-    /**
-     * 客户端配置类
-     *
-     * 使用 Properties 格式存储配置，支持 Cloth Config GUI。
-     */
     public static class ClientConfig {
 
-        /**
-         * 哈希计算线程数
-         *
-         * <p>用于 ClientHashManager 的 ForkJoinPool 并行计算区域文件哈希。</p>
-         * <p>默认值使用 JVM 可用处理器数的一半，避免阻塞游戏主线程。</p>
-         */
         private volatile int hashThreads;
 
-        /**
-         * 视距外 region 加载 tick 间隔：-1=一次排空，0=仅视距内，1-100=每 N tick 加载 1 个。
-         */
         private volatile int mapRegionLoadIntervalTicks = 1;
 
-        /** 客户端自动同步（进服：TICK/SCHEDULED；在线周期：仅 TICK） */
         private volatile boolean autoSyncEnabled = true;
 
-        /** 仅内置服房主：静默更新视距外地图，关闭后不监听或刷新。 */
         private volatile boolean integratedHostSilentUpdates = true;
 
-        /** 配置文件路径 */
         private final Path configFile;
 
-        /**
-         * 构造客户端配置
-         *
-         * @param configFile 配置文件路径
-         */
         public ClientConfig(Path configFile) {
             this.configFile = configFile;
-            // 计算默认线程数：可用处理器数的一半，最少 1 个
+
             int defaultThreads = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
             this.hashThreads = defaultThreads;
             load();
-            // 首次启动时自动生成默认配置文件
+
             if (!Files.exists(configFile)) {
                 save();
             }
         }
 
-        /**
-         * 从文件加载配置
-         */
         private void load() {
             if (!Files.exists(configFile)) {
                 LOGGER.info("Client config file not found, using defaults (hashThreads={})", hashThreads);
@@ -189,7 +124,7 @@ public class ModConfig {
 
                 int maxThreads = Runtime.getRuntime().availableProcessors();
                 int loadedThreads = Integer.parseInt(props.getProperty("hashThreads", String.valueOf(hashThreads)));
-                // 确保线程数在有效范围内
+
                 hashThreads = Math.max(1, Math.min(maxThreads, loadedThreads));
 
                 String intervalProp = props.getProperty("mapRegionLoadIntervalTicks");
@@ -210,9 +145,6 @@ public class ModConfig {
             }
         }
 
-        /**
-         * 保存配置到文件
-         */
         public void save() {
             try {
                 Files.createDirectories(configFile.getParent());
@@ -260,11 +192,6 @@ public class ModConfig {
             }
         }
 
-        /**
-         * 获取哈希计算线程数
-         *
-         * @return 配置的线程数
-         */
         public int getHashThreads() {
             return hashThreads;
         }
@@ -273,11 +200,6 @@ public class ModConfig {
             return mapRegionLoadIntervalTicks;
         }
 
-        /**
-         * 设置哈希计算线程数
-         *
-         * @param value 线程数
-         */
         public void setHashThreads(int value) {
             int maxThreads = Runtime.getRuntime().availableProcessors();
             hashThreads = Math.max(1, Math.min(maxThreads, value));
@@ -300,69 +222,44 @@ public class ModConfig {
         }
     }
 
-    /**
-     * 服务端配置类
-     *
-     * 使用 Properties 格式存储配置，支持 Cloth Config GUI。
-     */
     public static class ServerConfig {
 
-        // ========== 通用设置 ==========
         private volatile boolean enableDebugLogging = false;
         private volatile int maxConcurrentRegions = ConcurrentRegionsConfig.AUTO;
         private volatile int maxSyncPacketSize = 262144;
         private volatile int syncSpeedLimitKBps = 1024;
         private volatile int syncRadiusRegions = 0;
 
-        /**
-         * 服务端统一标识名（多入口复用同一地图缓存）。
-         * 客户端用此名而非 IP 命名存档目录，多个入口/域名/IP 映射到同一份地图缓存。
-         * 留空则客户端回退到 IP 命名（兼容旧行为）。
-         */
         private volatile String serverName = "";
 
-        // ========== 增量更新设置 ==========
         private volatile UpdateMode incrementalUpdateMode = UpdateMode.DISABLED;
         private volatile int incrementalUpdateIntervalTicks = 6000;
         private volatile int scheduledUpdateHour = 4;
         private volatile int scheduledUpdateMinute = 0;
 
-        // ========== 维度扫描配置 ==========
         private volatile ScanMode defaultScanMode = ScanMode.SURFACE;
         private volatile int defaultCaveStart = 63;
         private volatile List<String> dimensionConfigs = new ArrayList<>();
 
-        /** 配置文件路径 */
         private final Path configFile;
 
-        /**
-         * 构造服务端配置
-         *
-         * @param configFile 配置文件路径
-         */
         public ServerConfig(Path configFile) {
             this.configFile = configFile;
             load();
-            // 初始化默认维度配置
+
             if (dimensionConfigs.isEmpty()) {
                 dimensionConfigs = getDefaultDimensionConfigStrings();
             }
-            // 首次启动时自动生成默认配置文件
+
             if (!Files.exists(configFile)) {
                 save();
             }
         }
 
-        /**
-         * 获取原版维度的默认配置
-         */
         private List<String> getDefaultDimensionConfigStrings() {
             return DimensionConfigParser.getDefaultDimensionConfigStrings();
         }
 
-        /**
-         * 从文件加载配置
-         */
         private void load() {
             if (!Files.exists(configFile)) {
                 LOGGER.info("Config file not found, using defaults");
@@ -377,7 +274,6 @@ public class ModConfig {
                     props.load(reader);
                 }
 
-                // 通用设置
                 enableDebugLogging = Boolean.parseBoolean(
                         PropertiesHelper.get(props, "enableDebugLogging", "enable_debug_logging", "false"));
                 maxConcurrentRegions = ConcurrentRegionsConfig.clampConfigured(Integer.parseInt(
@@ -389,7 +285,6 @@ public class ModConfig {
                 syncSpeedLimitKBps = Integer.parseInt(
                         PropertiesHelper.get(props, "syncSpeedLimitKBps", "sync_speed_limit_kbps", "1024"));
 
-                // 服务端统一标识名（多入口复用同一地图缓存）
                 serverName = PropertiesHelper.get(props, "serverName", "server_name", "");
 
                 incrementalUpdateMode = UpdateMode.valueOf(
@@ -415,17 +310,11 @@ public class ModConfig {
             }
         }
 
-        /**
-         * 从磁盘重新加载配置。
-         */
         public void reload() {
             load();
             DimensionConfigParser.invalidateCache();
         }
 
-        /**
-         * 保存配置到文件
-         */
         public void save() {
             try {
                 Files.createDirectories(configFile.getParent());
@@ -434,7 +323,6 @@ public class ModConfig {
                 sb.append("# MapSyncer Atlas Server Configuration\n");
                 sb.append("#\n");
 
-                // ========== 通用设置 ==========
                 sb.append("# ========================================\n");
                 sb.append("# General settings\n");
                 sb.append("# ========================================\n");
@@ -485,7 +373,6 @@ public class ModConfig {
                 sb.append("serverName=" + serverName + "\n");
                 sb.append("\n");
 
-                // ========== 增量更新设置 ==========
                 sb.append("# ========================================\n");
                 sb.append("# Incremental update settings\n");
                 sb.append("# ========================================\n");
@@ -504,7 +391,6 @@ public class ModConfig {
                 sb.append("scheduledUpdateMinute=" + scheduledUpdateMinute + "\n");
                 sb.append("\n");
 
-                // ========== 维度扫描配置 ==========
                 sb.append("# ========================================\n");
                 sb.append("# Dimension scan settings\n");
                 sb.append("# ========================================\n");
@@ -528,8 +414,6 @@ public class ModConfig {
             }
         }
 
-        // ========== Getter 方法 ==========
-
         public boolean getEnableDebugLogging() {
             return enableDebugLogging;
         }
@@ -550,10 +434,6 @@ public class ModConfig {
             return syncSpeedLimitKBps;
         }
 
-        /**
-         * 获取服务端统一标识名（多入口复用同一地图缓存）。
-         * 留空表示未配置，客户端应回退到 IP 命名。
-         */
         public String getServerName() {
             return serverName;
         }
@@ -585,8 +465,6 @@ public class ModConfig {
         public List<String> getDimensionConfigs() {
             return new ArrayList<>(dimensionConfigs);
         }
-
-        // ========== Setter 方法 ==========
 
         public void setEnableDebugLogging(boolean value) {
             enableDebugLogging = value;
@@ -633,23 +511,14 @@ public class ModConfig {
             DimensionConfigParser.invalidateCache();
         }
 
-        /**
-         * 解析维度配置列表
-         */
         public List<DimensionScanConfig> parseDimensionConfigs() {
             return DimensionConfigParser.parseDimensionConfigs(dimensionConfigs);
         }
 
-        /**
-         * 解析单个配置字符串
-         */
         private DimensionScanConfig parseConfigString(String configStr) {
             return DimensionConfigParser.parseConfigString(configStr);
         }
 
-        /**
-         * 获取特定维度的扫描配置
-         */
         public DimensionScanConfig getConfigForDimension(String dimensionPath) {
             return DimensionConfigParser.getConfigForDimension(
                 dimensionPath, dimensionConfigs, defaultScanMode, defaultCaveStart);

@@ -1,8 +1,5 @@
 @echo off
 chcp 65001 >nul
-rem 切换构建用 JDK，并写入 gradle.properties。
-rem 用法: call set-gradle-jdk.bat 17^|21^|25
-rem 成功后导出 GRADLE_JDK_HOME / JAVA_HOME，并把 JDK\bin 放到 PATH 最前。
 setlocal EnableExtensions
 
 set "JDK_MAJOR=%~1"

@@ -11,10 +11,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-/**
- * 同步收包后的 region zip 异步写盘队列。
- * 文件 IO 与时间戳缓存更新在后台线程执行；Xaero 反射重载仍由调用方在主线程调度。
- */
 public final class ClientSyncWriteQueue {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientSyncWriteQueue.class);
@@ -50,12 +46,6 @@ public final class ClientSyncWriteQueue {
         return pendingWrites.get() > 0;
     }
 
-    /**
-     * 异步写入 region zip，并在 IO 线程更新内存中的时间戳缓存。
-     * 若线程池不可用，仍会通过 callback 通知失败（result=null），避免同步状态悬挂。
-     *
-     * @param callback 写盘完成回调（在 IO 线程或当前线程调用）
-     */
     public static void submit(ChunkMapData chunk, Path serverDir, int worldId,
             ClientTimestampCache tsCache, boolean integratedHost,
             String selectedMultiworld,
@@ -105,7 +95,6 @@ public final class ClientSyncWriteQueue {
         }
     }
 
-    /** 异步持久化时间戳缓存（避免主线程阻塞）。 */
     public static void saveTimestampCacheAsync(ClientTimestampCache tsCache) {
         if (tsCache == null) {
             return;

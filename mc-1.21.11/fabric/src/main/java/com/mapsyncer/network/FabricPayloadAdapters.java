@@ -19,15 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Fabric 1.21.11 Payload 适配器
- *
- * 将 platform-api 中的平台无关 Payload 包装为 Fabric CustomPacketPayload，
- * 并提供 StreamCodec 用于序列化/反序列化。
- */
 public class FabricPayloadAdapters {
-
-    // ===== CustomPacketPayload.Type 常量 =====
 
     public static final CustomPacketPayload.Type<SyncRequestWrapper> SYNC_REQUEST_TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(MapSyncer.MOD_ID, "sync_request"));
@@ -37,8 +29,6 @@ public class FabricPayloadAdapters {
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(MapSyncer.MOD_ID, "sync_progress"));
     public static final CustomPacketPayload.Type<ServerInstalledWrapper> SERVER_INSTALLED_TYPE =
             new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(MapSyncer.MOD_ID, "server_installed"));
-
-    // ===== StreamCodec 定义 =====
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncRequestWrapper> SYNC_REQUEST_CODEC =
             StreamCodec.of(
@@ -94,8 +84,6 @@ public class FabricPayloadAdapters {
         }
     }
 
-    // ===== 同步请求序列化 =====
-
     private static void writeSyncRequest(RegistryFriendlyByteBuf buf, SyncRequestPayload payload) {
         SyncRequestWireCodec.write(buf, payload);
     }
@@ -103,8 +91,6 @@ public class FabricPayloadAdapters {
     private static SyncRequestPayload readSyncRequest(RegistryFriendlyByteBuf buf) {
         return SyncRequestWireCodec.read(buf);
     }
-
-    // ===== 同步响应序列化 =====
 
     private static void writeSyncResponse(RegistryFriendlyByteBuf buf, SyncResponsePayload payload) {
         buf.writeInt(payload.worldId());
@@ -128,8 +114,6 @@ public class FabricPayloadAdapters {
         return new SyncResponsePayload(chunks, isComplete, worldId, status);
     }
 
-    // ===== 同步进度序列化 =====
-
     private static void writeSyncProgress(RegistryFriendlyByteBuf buf, SyncProgressPayload payload) {
         buf.writeInt(payload.processed());
         buf.writeInt(payload.total());
@@ -140,8 +124,6 @@ public class FabricPayloadAdapters {
         return new SyncProgressPayload(buf.readInt(), buf.readInt(), buf.readUtf());
     }
 
-    // ===== 服务端已安装序列化 =====
-
     private static void writeServerInstalled(RegistryFriendlyByteBuf buf, ServerInstalledPayload payload) {
         ServerInstalledWireCodec.write(buf, payload);
     }
@@ -149,8 +131,6 @@ public class FabricPayloadAdapters {
     private static ServerInstalledPayload readServerInstalled(RegistryFriendlyByteBuf buf) {
         return ServerInstalledWireCodec.read(buf);
     }
-
-    // ===== ChunkMapData 序列化 =====
 
     private static void writeChunkMapData(RegistryFriendlyByteBuf buf, ChunkMapData data) {
         buf.writeInt(data.regionX);

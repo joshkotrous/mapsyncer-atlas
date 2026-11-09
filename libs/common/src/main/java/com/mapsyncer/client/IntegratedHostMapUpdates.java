@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
-/** 房主客户端独立链路：不调用生成、同步、哈希扫描或客机的重载队列。 */
 public final class IntegratedHostMapUpdates {
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegratedHostMapUpdates.class);
     private static HostMapFileWatcher watcher;
@@ -34,7 +33,7 @@ public final class IntegratedHostMapUpdates {
             if (!XaeroReflectionHelper.initialize()) return;
             var context = XaeroHostMapRefresh.context(XaeroReflectionHelper.getMapProcessor());
             if (context == null) { closeWatcher(); return; }
-            // 切换世界时 Xaero 暂留的旧会话不能对新存档进行刷新。
+
             var layout = com.mapsyncer.server.ServerMapCache.snapshot();
             if (!layout.sharedXaero()) { closeWatcher(); return; }
             {
@@ -60,7 +59,7 @@ public final class IntegratedHostMapUpdates {
             int distance = XaeroHostMapRefresh.writingDistance(context);
             int playerChunkX = client.player.getBlockX() >> 4;
             int playerChunkZ = client.player.getBlockZ() >> 4;
-            // 浏览其他维度时，房主当前维度的近处绘制范围不适用于所浏览的地图。
+
             String playingDimension = com.mapsyncer.util.DimensionPathMapping.getInstance().toXaeroDimension(
                     com.mapsyncer.util.DimensionApiHelper.getDimId(client.level.dimension()));
             String viewedDimension = ((java.nio.file.Path) context.dimension().getClass()

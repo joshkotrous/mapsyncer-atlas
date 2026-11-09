@@ -32,7 +32,6 @@ logs/
 # Claude Code
 .claude/
 
-# 参考资料（反编译源码、工具 JAR、日志等，不参与构建）
 .reference/
 
 # Decompiler output
@@ -63,14 +62,11 @@ CRC32Tool.class
 # Temporary decompilation artifacts
 .tmpfml/
 
-# 本地临时测试产物（统一存放，不参与构建与提交）
 /cache/*
 !/cache/README.md
 
-# 根目录构建日志（本地调试产物）
 /*.log
 
-# Java / Python 本地分析产物
 *.class
 __pycache__/
 *.pyc

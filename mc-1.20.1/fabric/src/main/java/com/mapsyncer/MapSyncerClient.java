@@ -14,9 +14,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * MapSyncer 客户端初始化类 - Fabric 1.20.1 版本
- */
 public class MapSyncerClient implements ClientModInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapSyncerClient.class);
@@ -25,7 +22,6 @@ public class MapSyncerClient implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info("Initializing MapSyncer client...");
 
-        // 初始化客户端配置（生成默认配置文件）
         ModConfig.getClientConfig(FabricLoader.getInstance().getConfigDir());
 
         FabricNetworkHandler networkHandler = MapSyncer.getNetworkHandler();
@@ -49,7 +45,6 @@ public class MapSyncerClient implements ClientModInitializer {
             MapPacketReceiver.onDisconnect();
         });
 
-        // 注册 ClientTick 事件：每 tick 排放一个视距外 region 到 Xaero MapProcessor
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             MapPacketHandler.drainPendingLoadQueue();
         });

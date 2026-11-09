@@ -10,7 +10,6 @@ base {
     archivesName = mod_id
 }
 
-// Fabric 26.1 需要 Java 25
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 repositories {
@@ -21,7 +20,6 @@ repositories {
     maven { url = 'https://maven.shedaniel.me/' }
 }
 
-// 引用版本特定的共享源码（不独立编译，由本模块提供 MC 依赖）
 sourceSets.main.java.srcDirs(
     "${rootProject.projectDir}/libs/mc-26/src/main/java",
     "${rootProject.projectDir}/libs/common/src/main/java",
@@ -37,7 +35,7 @@ apply from: rootProject.file('gradle/fabric-lz4-shadow.gradle')
 apply from: rootProject.file('gradle/fabric-modmenu-stub.gradle')
 
 dependencies {
-    // Minecraft and Fabric 26.1 (无混淆映射，MC 26.1 即官方映射)
+
     minecraft "com.mojang:minecraft:${minecraft_261_version}"
     implementation "net.fabricmc:fabric-loader:0.19.2"
 
@@ -47,7 +45,6 @@ dependencies {
     // Cloth Config (for configuration)
     implementation "me.shedaniel.cloth:cloth-config-fabric:${cloth_config_261_version}"
 
-    // 依赖核心模块
     implementation project(':libs:core')
     implementation project(':libs:platform-api')
     shadowBundle project(':libs:core')

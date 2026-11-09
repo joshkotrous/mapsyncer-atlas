@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# MapSyncer 全平台构建（Linux / WSL，与 build-all.bat 同阶段逻辑）
-# 结构: libs/mc-* 锚点 + mc-{版本}/{loader} 胶水；Forge / 部分 Fabric 需隔离 settings
-# 仅依赖 bash / GNU 工具，不调用 PowerShell
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

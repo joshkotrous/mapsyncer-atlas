@@ -1,10 +1,5 @@
 package com.mapsyncer.client;
 
-/**
- * 地图数据包接收器 - Fabric 平台包装器
- *
- * 核心逻辑委托给 {@link MapPacketHandler}。
- */
 public class MapPacketReceiver {
 
     public static void register() {

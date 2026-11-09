@@ -1,6 +1,5 @@
 package com.mapsyncer.client;
 
-/** 使用区块坐标和 Xaero 实际绘制距离；与近处写入范围相交的整个 region 都不重载。 */
 public final class HostMapUpdatePolicy {
     private HostMapUpdatePolicy() {}
     public static boolean outsideWritingRange(int regionX, int regionZ, int playerChunkX, int playerChunkZ, int distance) {

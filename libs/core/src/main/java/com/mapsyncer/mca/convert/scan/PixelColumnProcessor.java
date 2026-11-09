@@ -15,16 +15,10 @@ import java.util.List;
 
 import static com.mapsyncer.mca.convert.model.ConvertConstants.REGION_SIZE_BLOCKS;
 
-/**
- * 统一的列扫描逻辑，合并原 single/multi palette 路径。
- */
 public final class PixelColumnProcessor {
 
     private PixelColumnProcessor() {}
 
-    /**
-     * @return true 表示该像素已找到表面
-     */
     public static boolean processColumn(
             ChunkDataParser.ChunkInfo chunk,
             ChunkSectionParser.SectionData section,

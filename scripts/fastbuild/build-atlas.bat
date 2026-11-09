@@ -1,6 +1,8 @@
 @echo off
 setlocal EnableExtensions
 cd /d "%~dp0..\.."
+python scripts\testing\check-english-release.py
+if errorlevel 1 exit /b %ERRORLEVEL%
 if not defined JAVA_HOME (
     if exist "C:\Program Files\Android\Android Studio\jbr\bin\javac.exe" set "JAVA_HOME=C:\Program Files\Android\Android Studio\jbr"
 )
@@ -24,4 +26,7 @@ set "RESULT=%ERRORLEVEL%"
 move /y settings.atlas-backup.gradle settings.gradle >nul
 if not "%RESULT%"=="0" exit /b %RESULT%
 call scripts\fastbuild\copy-release-jars.bat mc-26.3\fabric\build\libs
+if errorlevel 1 exit /b %ERRORLEVEL%
+for /f "tokens=1,* delims==" %%A in (gradle.properties) do if "%%A"=="mod_version" set "ATLAS_VERSION=%%B"
+python scripts\testing\check-english-release.py --jar "output\mapsyncer-atlas-%ATLAS_VERSION%-fabric-26.3.jar"
 exit /b %ERRORLEVEL%

@@ -4,9 +4,6 @@ import com.mapsyncer.mca.ChunkSectionParser;
 
 import java.util.List;
 
-/**
- * 预计算的 chunk 内 quart（4×4×4）biome 体素表，将 fill 阶段查表降为 O(1)。
- */
 public final class BiomeQuartGrid {
 
     private static final int VOXELS_PER_SECTION = 64;
@@ -58,9 +55,6 @@ public final class BiomeQuartGrid {
         return new BiomeQuartGrid(minSectionY, grids);
     }
 
-    /**
-     * O(1) quart 查表；无数据时返回 null（由 {@link BiomeQuartResolver} 走原有回退链）。
-     */
     public String lookup(int lx, int absoluteY, int lz) {
         int sectionIdx = (absoluteY >> 4) - minSectionY;
         if (sectionIdx < 0 || sectionIdx >= sectionVoxels.length) {

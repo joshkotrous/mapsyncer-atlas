@@ -5,9 +5,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * SyncRequestPayload 网络序列化（需在 MC 模块中编译）。
- */
 public final class SyncRequestWireCodec {
 
     private SyncRequestWireCodec() {}

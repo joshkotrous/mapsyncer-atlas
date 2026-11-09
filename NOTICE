@@ -7,7 +7,9 @@ Upstream baseline: 85384f8
 
 Fork changes dated 2026-11-09: English-first documentation and Fabric 26.3
 configuration output, an in-game setup guide, distinct project identity,
-portable focused build and release packaging. Original implementation and
+portable focused build and release packaging. Atlas.2 translates implementation
+messages and configuration help, removes Chinese implementation comments, uses
+English language resources and adds bounded map-fragment reassembly. Original implementation and
 attribution are retained. Distributed under GNU GPL version 3; see LICENSE.
 This is an independent fork, not an official release from Ruo_Chen or Xaero.
 

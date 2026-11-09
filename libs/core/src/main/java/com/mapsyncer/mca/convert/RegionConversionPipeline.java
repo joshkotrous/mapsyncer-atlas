@@ -51,9 +51,6 @@ public final class RegionConversionPipeline {
             lightMode, caveParams, dimTypeInfo.hasSkylight(), blockLookup);
     }
 
-    /**
-     * 单次 MCA 解析，输出多个层/地表 pass 的转换结果。
-     */
     public static List<RegionConverterStandalone.LayerConvertedRegion> convertMulti(
             Path mcaPath, int regionX, int regionZ,
             DimensionTypeInfo dimTypeInfo,
