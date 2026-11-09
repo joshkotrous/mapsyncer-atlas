@@ -1,0 +1,12 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.fabricmc.net/' }
+    }
+}
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+rootProject.name = 'mapsyncer-atlas'
+include 'libs:core', 'libs:lz4-relocated', 'libs:platform-api', 'libs:common', 'libs:mc-26'
+include 'mc-26.3:fabric'

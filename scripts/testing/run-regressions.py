@@ -22,7 +22,7 @@ logging_copy = WORK / 'slf4j-api.jar'
 shutil.copyfile(logging[0], logging_copy)
 version = next(line.split('=', 1)[1].strip() for line in (ROOT / 'gradle.properties').read_text().splitlines()
                if line.startswith('mod_version='))
-artifact = ROOT / 'output' / f'mapsyncer-{version}-fabric-1.21.jar'
+artifact = Path(os.environ['MAPSYNCER_REGRESSION_JAR']) if os.environ.get('MAPSYNCER_REGRESSION_JAR') else ROOT / 'output' / f'mapsyncer-{version}-fabric-1.21.jar'
 if not artifact.is_file():
     sys.exit('Run build-target.bat fabric-1.21.1 first')
 classes = WORK / 'classes'

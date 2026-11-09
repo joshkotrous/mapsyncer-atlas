@@ -18,7 +18,7 @@ configurations {
 }
 
 dependencies {
-    lz4Shadow 'org.lz4:lz4-java:1.8.0'
+    lz4Shadow 'at.yawk.lz4:lz4-java:1.14.0'
 }
 
 apply from: rootProject.file('gradle/lz4-relocate.gradle')

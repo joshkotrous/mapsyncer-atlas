@@ -4,7 +4,7 @@ A multi-platform Minecraft mod that converts server-side explored / pre-generate
 
 > **Use case**: Players joining an established server, or servers using Chunky for pre-generation — sync the map and cut redundant exploration.
 
-Chinese README: [`README.md`](README.md) · Full module list: [`docs/features.md`](docs/features.md)
+Original Chinese README: [`README_ZH_UPSTREAM.md`](README_ZH_UPSTREAM.md) · Full module list: [`docs/features.md`](docs/features.md)
 
 ---
 

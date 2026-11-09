@@ -7,7 +7,7 @@ version = mod_version
 
 // Platform API 模块兼容 Java 17（字节码），但使用 Java 21 编译
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(providers.gradleProperty('atlasBuild').isPresent() ? 25 : 21)
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }

@@ -7,7 +7,7 @@ version = mod_version + '-fabric-' + g4_263_jar_suffix
 group = mod_group_id
 
 base {
-    archivesName = mod_id
+    archivesName = "mapsyncer-atlas"
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
@@ -73,4 +73,10 @@ publishing {
             url "file://${project.projectDir}/repo"
         }
     }
+}
+
+processResources {
+    from(rootProject.file("LICENSE"))
+    from(rootProject.file("NOTICE"))
+    from(rootProject.file("publishing/LICENSE-LZ4.txt"))
 }

@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.resources.Identifier;
+import net.minecraft.network.chat.Component;
 
 /**
  * 客户端命令注册 - Fabric 26.x 版本
@@ -21,6 +22,13 @@ public class MapSyncerCommand {
                         .executes(ctx -> { MapSyncerCommandLogic.showHelp(false); return Command.SINGLE_SUCCESS; })
                         .then(ClientCommands.literal("help")
                                 .executes(ctx -> { MapSyncerCommandLogic.showHelp(false); return Command.SINGLE_SUCCESS; }))
+                        .then(ClientCommands.literal("guide")
+                                .executes(ctx -> {
+                                    for (String line : AtlasGuide.lines()) {
+                                        ctx.getSource().sendFeedback(Component.literal(line));
+                                    }
+                                    return Command.SINGLE_SUCCESS;
+                                }))
                         .then(ClientCommands.literal("sync")
                                 .executes(ctx -> MapSyncerCommandLogic.executeSyncCurrentDim())
                                 .then(ClientCommands.literal("all")
